@@ -15,8 +15,11 @@ const __dirname = dirname(__filename);
 
 // 本地可视化内容管理后台（仅 dev 生效，生产构建不包含）：
 // 提供 /__admin_api/* 读写 public/content/*.json、接收 base64 图片写盘、触发本地构建。
+// 简易口令门禁：设置环境变量 ADMIN_TOKEN 后，所有 /__admin_api/* 请求须带
+// 请求头 x-admin-token 匹配才放行；未设置则保持向后兼容（不拦截）。
 function adminApiPlugin() {
   const contentDir = join(__dirname, 'public', 'content');
+  const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
   const readBody = (req: any) =>
     new Promise<string>((resolve, reject) => {
       let data = '';
@@ -35,6 +38,10 @@ function adminApiPlugin() {
       server.middlewares.use(async (req: any, res: any, next: any) => {
         const url: string = req.url || '';
         if (!url.startsWith('/__admin_api/')) return next();
+        // —— 口令门禁 ——
+        if (ADMIN_TOKEN && (req.headers['x-admin-token'] || '') !== ADMIN_TOKEN) {
+          return sendJson(res, 401, { error: '需要后台口令（x-admin-token）' });
+        }
         try {
           const root = url.replace('/__admin_api/', '').split('?')[0];
 

@@ -101,6 +101,22 @@
         <p class="diff-empty" v-else>✅ 当前内容与打开时一致，无变更</p>
       </div>
     </div>
+
+    <!-- 后台口令门禁 -->
+    <div class="auth-pop" v-if="needAuth" @click.self="needAuth = false">
+      <div class="auth-box">
+        <header><b>🔒 后台口令</b></header>
+        <p class="auth-tip">本地后台已启用手令，请输入启动 dev 时设置的 <code>ADMIN_TOKEN</code>。</p>
+        <input
+          class="auth-input"
+          type="password"
+          v-model="pwInput"
+          placeholder="请输入后台口令"
+          @keyup.enter="unlock"
+        />
+        <button class="btn primary" @click="unlock">🔓 进入后台</button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -120,6 +136,19 @@ import RaceEditor from '@/admin/editors/RaceEditor.vue';
 import CheckinEditor from '@/admin/editors/CheckinEditor.vue';
 import PoolEditor from '@/admin/editors/PoolEditor.vue';
 import JsonEditor from '@/admin/components/JsonEditor.vue';
+import { adminFetch, setAdminToken } from '@/admin/api';
+
+/** 后台口令门禁：token 缺失或服务端 401 时弹窗要求输入（与 vite.config adminApiPlugin 对应） */
+const needAuth = ref(false);
+const pwInput = ref('');
+function unlock() {
+  const v = pwInput.value.trim();
+  if (!v) return;
+  setAdminToken(v);
+  pwInput.value = '';
+  needAuth.value = false;
+  load(activeId.value); // 用新口令重试加载
+}
 
 const groups = computed(() => [...new Set(MODULES.map((m) => m.group))]);
 const modulesByGroup = (g: string) => MODULES.filter((m) => m.group === g);
@@ -247,11 +276,15 @@ async function rollback(ts: number) {
 }
 
 async function api<T = any>(path: string, method = 'GET', body?: any): Promise<T> {
-  const res = await fetch(`/__admin_api/${path}`, {
+  const res = await adminFetch(`/__admin_api/${path}`, {
     method,
     headers: body ? { 'Content-Type': 'application/json' } : undefined,
     body: body ? JSON.stringify(body) : undefined,
   });
+  if (res.status === 401) {
+    needAuth.value = true; // 口令不对/未设，弹窗要求输入
+    throw new Error('需要后台口令');
+  }
   return res.json();
 }
 
@@ -515,7 +548,13 @@ onMounted(() => load(activeId.value));
 .loading { padding: 40px; color: #8a90a0; text-align: center; }
 
 /* 快照 / 对比 弹层 */
-.snap-pop, .diff-pop { position: fixed; inset: 0; background: rgba(20,24,40,.4); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 24px; }
+.snap-pop, .diff-pop, .auth-pop { position: fixed; inset: 0; background: rgba(20,24,40,.4); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 24px; }
+.auth-box { width: min(380px, 92vw); background: #fff; border-radius: 16px; box-shadow: 0 18px 50px rgba(0,0,0,.25); padding: 22px; display: flex; flex-direction: column; gap: 12px; }
+.auth-box header { font-size: 16px; }
+.auth-tip { font-size: 12px; color: #8a90a0; margin: 0; line-height: 1.6; }
+.auth-tip code { background: #f0f2f8; padding: 1px 6px; border-radius: 6px; font-size: 11.5px; }
+.auth-input { height: 40px; border: 1px solid #dfe3ee; border-radius: 10px; padding: 0 12px; font-size: 14px; outline: none; }
+.auth-input:focus { border-color: #8fa6e8; }
 .snap-box, .diff-box { width: min(560px, 92vw); max-height: 80vh; background: #fff; border-radius: 16px; box-shadow: 0 18px 50px rgba(0,0,0,.25); display: flex; flex-direction: column; overflow: hidden; }
 .snap-box header, .diff-box header { display: flex; align-items: center; gap: 8px; padding: 14px 18px; border-bottom: 1px solid #eef0f6; font-size: 15px; }
 .diff-box header .sub { font-size: 12px; color: #8a90a0; font-weight: 400; }

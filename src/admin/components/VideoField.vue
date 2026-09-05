@@ -24,6 +24,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { adminFetch } from '../api';
 
 const props = withDefaults(
   defineProps<{
@@ -57,7 +58,7 @@ const metaText = computed(() => {
 });
 
 async function api<T = any>(path: string, method = 'GET', body?: any): Promise<T> {
-  const res = await fetch(`/__admin_api/${path}`, {
+  const res = await adminFetch(`/__admin_api/${path}`, {
     method,
     headers: body ? { 'Content-Type': 'application/json' } : undefined,
     body: body ? JSON.stringify(body) : undefined,

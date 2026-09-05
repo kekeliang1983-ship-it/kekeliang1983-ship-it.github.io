@@ -24,6 +24,8 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - name: 校验 content/*.json 结构
+        run: node scripts/validate-content.mjs
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:

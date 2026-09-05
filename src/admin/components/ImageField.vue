@@ -23,6 +23,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { compressImage } from '../img';
+import { adminFetch } from '../api';
 
 // modelValue 必须可选并给默认值：很多内容条目没有 originalSrc，
 // 若声明为必填 String，传 undefined 会刷出满屏 Vue 类型警告。
@@ -49,7 +50,7 @@ const lastKb = ref<number | null>(null);
 const hint = ref('');
 
 async function api<T = any>(path: string, method = 'GET', body?: any): Promise<T> {
-  const res = await fetch(`/__admin_api/${path}`, {
+  const res = await adminFetch(`/__admin_api/${path}`, {
     method,
     headers: body ? { 'Content-Type': 'application/json' } : undefined,
     body: body ? JSON.stringify(body) : undefined,

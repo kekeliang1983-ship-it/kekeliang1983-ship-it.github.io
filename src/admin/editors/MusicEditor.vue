@@ -115,6 +115,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
+import { adminFetch } from '../api';
 
 const props = defineProps<{ data: any }>();
 
@@ -173,7 +174,7 @@ async function onPick(t: any, e: Event) {
     const base64 = String(reader.result).split(',')[1];
     const fname = `${t.id || 'track'}.mp3`;
     try {
-      await fetch('/__admin_api/upload', {
+      await adminFetch('/__admin_api/upload', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ path: `audio/${fname}`, data: base64 }),
       });
