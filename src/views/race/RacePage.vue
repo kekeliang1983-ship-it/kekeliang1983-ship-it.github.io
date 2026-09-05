@@ -92,6 +92,16 @@
       6 只同场 · 约 20~30 秒一局 · 途中互扔道具随时翻盘，末名也有小奖励
     </p>
 
+    <!-- 联机榜 / 异步对战 -->
+    <button class="board-btn" v-feedback="'BUTTON_CLICK'" @click="openBoard">
+      🏆 联机榜 · 挑战远方玩家
+    </button>
+    <div class="challenge-banner" v-if="raceStore.challenge">
+      👻 挑战中：远方玩家最佳 <b>{{ fmtTime(raceStore.challenge.targetMs) }}</b>
+      <span class="cb-element">{{ ELEM_EMOJI[raceStore.challenge.petElement] || '🐾' }}</span>
+      <button class="cb-cancel" v-feedback="'BUTTON_CLICK'" @click="raceStore.clearChallenge()">取消</button>
+    </div>
+
     <!-- 赛道动画 -->
     <RaceTrack
       :open="racing"
@@ -99,11 +109,35 @@
       :track-element="startInfo?.trackElement ?? 'wood'"
       :track-skin="skin"
       :weather="weather"
+      :ghost-target-ms="raceStore.challenge?.targetMs ?? null"
       @finished="onFinished"
     />
 
     <!-- 结算卡 -->
     <RaceResultModal :open="resultOpen" :result="result" @close="onClose" @again="onAgain" />
+
+    <!-- 联机榜 sheet -->
+    <Overlay variant="sheet" :open="boardOpen" @close="boardOpen = false">
+      <h3 class="sheet-title">联机榜 · 远方玩家 <span class="online-tag">{{ isSupabaseEnabled ? '已连接' : '离线' }}</span></h3>
+      <p class="hint">当前赛道「{{ skin?.name }}」其他玩家的最佳成绩。点「挑战」即可与 TA 的残影同场竞速，跑得更快就赢！</p>
+
+      <div v-if="!isSupabaseEnabled" class="board-empty">未连接云端，暂时看不到远方玩家～连接后这里会出现真实对手</div>
+
+      <div v-else-if="boardLoading" class="board-empty">拉取中…</div>
+
+      <div v-else-if="boardError" class="board-empty">拉取失败，稍后再试</div>
+
+      <div v-else-if="opponents.length === 0" class="board-empty">还没有其他玩家来过这条赛道，去跑一局上传你的成绩抢首榜吧！</div>
+
+      <div class="board-list" v-else>
+        <div class="board-row" v-for="(o, i) in opponents" :key="o.fingerprint">
+          <span class="br-rank">{{ i + 1 }}</span>
+          <span class="br-emoji">{{ ELEM_EMOJI[o.petElement] || '🐾' }}</span>
+          <span class="br-time">{{ fmtTime(o.timeMs) }}</span>
+          <button class="br-btn" v-feedback="'BUTTON_CLICK'" @click="pickChallenge(o)">挑战</button>
+        </div>
+      </div>
+    </Overlay>
   </div>
 </template>
 
@@ -118,6 +152,8 @@ import { useUserStore } from '@/stores/useUserStore';
 import { useToast } from '@/composables/useToast';
 import RaceTrack from '@/components/RaceTrack.vue';
 import RaceResultModal from '@/components/RaceResultModal.vue';
+import Overlay from '@/components/common/Overlay.vue';
+import { isSupabaseEnabled, fetchRaceOpponents, type RaceOpponent } from '@/services/supabase';
 
 const router = useRouter();
 const modules = useModulesStore();
@@ -217,16 +253,23 @@ const resultOpen = computed(() => !racing.value && result.value !== null);
 
 function onStart() {
   raceStore.ensureDailyReset();
+  raceStore.clearLastChallenge();
   const info = raceStore.beginRace(selectedEl.value);
   if (!info) { showToast(startLabel.value); return; }
   startInfo.value = info;
   racing.value = true;
 }
 
-function onFinished(rank: number) {
+function onFinished(payload: { rank: number; durationMs: number }) {
   racing.value = false;
   if (!startInfo.value) return;
-  result.value = raceStore.finishRace(rank, startInfo.value.predictedRank);
+  result.value = raceStore.finishRace(payload.rank, startInfo.value.predictedRank);
+  raceStore.submitRaceScore(payload.durationMs, payload.rank, selectedEl.value);
+  if (raceStore.lastChallenge) {
+    const lc = raceStore.lastChallenge;
+    const fmt = (ms: number) => `${(ms / 1000).toFixed(1)}s`;
+    showToast(lc.win ? `🏆 击败远方玩家！你 ${fmt(lc.myMs)} < 对方 ${fmt(lc.targetMs)}` : `😶 惜败远方玩家：你 ${fmt(lc.myMs)} vs 对方 ${fmt(lc.targetMs)}`);
+  }
 }
 
 function onClose() { result.value = null; raceStore.releaseRacePet(); }
@@ -240,6 +283,29 @@ function onAgain() {
 function goBack() {
   if (window.history.length > 1) router.back();
   else router.push('/app/pet');
+}
+
+/* 联机榜（方案甲：异步对战） */
+const boardOpen = ref(false);
+const opponents = ref<RaceOpponent[]>([]);
+const boardLoading = ref(false);
+const boardError = ref(false);
+const ELEM_EMOJI: Record<string, string> = { gold: '🥇', wood: '🌿', water: '💧', fire: '🔥', earth: '🪨' };
+const fmtTime = (ms: number) => `${(ms / 1000).toFixed(1)}s`;
+async function openBoard() {
+  boardOpen.value = true;
+  opponents.value = [];
+  boardError.value = false;
+  if (!isSupabaseEnabled) return; // 离线：sheet 内提示
+  boardLoading.value = true;
+  const list = await fetchRaceOpponents(skin.value?.id ?? 'meadow', 5);
+  boardLoading.value = false;
+  if (list === null) { boardError.value = true; return; }
+  opponents.value = list;
+}
+function pickChallenge(o: RaceOpponent) {
+  raceStore.setChallenge(o);
+  boardOpen.value = false;
 }
 
 /* 时间引擎（每秒 tick 驱动冷却倒计时；keepAlive 省电） */
@@ -358,4 +424,47 @@ onUnmounted(() => { stopTick(); raceStore.releaseRacePet(); });
 .start-btn:active { transform: scale(.97); }
 .start-btn:disabled { opacity: .45; cursor: default; transform: none; box-shadow: none; background: var(--bg-card-strong); color: var(--text-muted); }
 .hint { margin: 0; font-size: 11px; color: var(--text-muted); text-align: center; }
+
+/* 联机榜 */
+.board-btn {
+  width: 100%; padding: 13px; border: 0; border-radius: 16px; cursor: pointer;
+  background: var(--bg-card-strong); color: var(--text-primary);
+  font-size: 14px; font-weight: 800; box-shadow: var(--shadow-float);
+  transition: transform .14s;
+}
+.board-btn:active { transform: scale(.97); }
+.challenge-banner {
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+  padding: 10px 14px; border-radius: 14px;
+  background: rgba(138,128,216,.14); color: var(--accent);
+  font-size: 12.5px; font-weight: 700;
+}
+.challenge-banner b { color: var(--text-primary); }
+.cb-element { font-size: 16px; }
+.cb-cancel {
+  margin-left: auto; border: 0; border-radius: 999px; cursor: pointer;
+  background: rgba(120,120,140,.18); color: var(--text-secondary);
+  font-size: 11px; font-weight: 700; padding: 4px 12px;
+}
+.cb-cancel:active { transform: scale(.94); }
+.online-tag {
+  font-size: 10px; font-weight: 700; padding: 1px 8px; border-radius: 999px;
+  background: rgba(94,156,122,.2); color: var(--growth); margin-left: 6px;
+}
+.board-empty { margin: 24px 0; text-align: center; font-size: 12.5px; color: var(--text-muted); line-height: 1.6; }
+.board-list { display: flex; flex-direction: column; gap: 8px; }
+.board-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 14px;
+  background: var(--bg-card-strong);
+}
+.br-rank { flex: 0 0 22px; text-align: center; font-size: 13px; font-weight: 800; color: var(--text-muted); }
+.br-emoji { font-size: 20px; }
+.br-time { flex: 1; font-size: 14px; font-weight: 800; color: var(--text-primary); }
+.br-btn {
+  border: 0; border-radius: 999px; cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), var(--accent-soft));
+  color: #fff; font-size: 12px; font-weight: 800; padding: 6px 16px;
+}
+.br-btn:active { transform: scale(.95); }
 </style>

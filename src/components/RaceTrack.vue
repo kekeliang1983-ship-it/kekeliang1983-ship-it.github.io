@@ -21,6 +21,13 @@
             </div>
           </header>
 
+          <div class="ghost-bar" v-if="ghostTargetMs && ghostTargetMs > 0">
+            <span class="gb-label">👻 远方对手残影</span>
+            <div class="gb-track">
+              <span class="gb-runner" :style="{ left: `calc(${Math.min(100, ghostProgress * 100)}% - 16px)` }">👻</span>
+            </div>
+          </div>
+
           <div class="lanes" :style="skinLaneStyle">
             <div
               v-for="(r, i) in runners"
@@ -96,8 +103,10 @@ const props = defineProps<{
   trackSkin?: RaceTrackSkin | null;
   /** 今日天气（视觉 + 全局修正）；缺省不影响比赛 */
   weather?: RaceWeather | null;
+  /** B4 异步对战：远方对手的「最佳用时」(ms)，用于渲染残影进度；无则无残影 */
+  ghostTargetMs?: number | null;
 }>();
-const emit = defineEmits<{ (e: 'finished', rank: number): void }>();
+const emit = defineEmits<{ (e: 'finished', payload: { rank: number; durationMs: number }): void }>();
 
 interface Runner extends Racer {
   progress: number;
@@ -136,6 +145,8 @@ const runners = ref<Runner[]>([]);
 const projectiles = ref<Projectile[]>([]);
 const comments = ref<{ id: number; text: string }[]>([]);
 const allDone = ref(false);
+/** B4 异步对战：远方对手残影进度（0~1，随 elapsed 线性逼近其最佳用时） */
+const ghostProgress = ref(0);
 
 let raf = 0;
 let lastTs = 0;
@@ -173,6 +184,7 @@ function buildRunners() {
   comments.value = [];
   finishCounter = 0;
   allDone.value = false;
+  ghostProgress.value = 0;
   prevPlayerRank = props.racers.length;
   const now = performance.now();
   const rate = eventRate.value; // 皮肤 × 天气，>1 事件更密集
@@ -192,6 +204,9 @@ function loop(ts: number) {
   const dt = Math.min(0.05, (ts - lastTs) / 1000);
   lastTs = ts;
   const elapsed = ts - startTime;
+  if (props.ghostTargetMs && props.ghostTargetMs > 0) {
+    ghostProgress.value = Math.min(1, elapsed / props.ghostTargetMs);
+  }
 
   // 清理过期命中/抖动
   for (const r of runners.value) {
@@ -300,7 +315,8 @@ function loop(ts: number) {
       rank = sorted.findIndex((r) => r.isPlayer) + 1;
     }
     audio.play('coin');
-    window.setTimeout(() => emit('finished', rank), 700);
+    const durationMs = elapsed; // 本局真实用时（与 ghost 同源时钟，保证对战公平）
+    window.setTimeout(() => emit('finished', { rank, durationMs }), 700);
     return;
   }
   raf = requestAnimationFrame(loop);
@@ -356,6 +372,10 @@ onUnmounted(() => stopLoop());
 .ln-combo { flex: 0 0 auto; margin-left: 4px; font-size: 10px; font-weight: 800; color: #E0913A; background: rgba(224,145,58,.16); padding: 0 5px; border-radius: 999px; }
 
 .lanes { position: relative; display: flex; flex-direction: column; gap: 9px; }
+.ghost-bar { display: flex; align-items: center; gap: 10px; padding: 6px 10px; margin-bottom: 4px; border-radius: 12px; background: rgba(120,120,140,.1); border: 1px dashed rgba(120,120,140,.3); }
+.gb-label { flex: 0 0 88px; font-size: 11px; font-weight: 700; color: var(--text-secondary, #666); white-space: nowrap; }
+.gb-track { position: relative; flex: 1; height: 22px; background: repeating-linear-gradient(90deg, rgba(120,120,140,.12) 0 18px, transparent 18px 36px); border-radius: 8px; overflow: visible; }
+.gb-runner { position: absolute; top: 50%; transform: translateY(-50%); font-size: 18px; opacity: .7; filter: drop-shadow(0 2px 4px rgba(80,70,120,.3)); transition: left .08s linear; }
 .lane {
   display: flex; align-items: center; gap: 10px;
   padding: 7px 10px; border-radius: 14px;

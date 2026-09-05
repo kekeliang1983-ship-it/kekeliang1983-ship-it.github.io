@@ -137,3 +137,57 @@ export async function recordFarmVisit(visitorFingerprint: string, hostFingerprin
     console.warn('[supabase] 记录拜访失败', e);
   }
 }
+
+// ============================================================
+// B4 竞速异步成绩榜（方案甲）：上传成绩 + 拉取他人最佳成绩
+// ============================================================
+
+/** 联机榜上的对手（他人在「当前赛道」的最佳成绩） */
+export interface RaceOpponent {
+  fingerprint: string;
+  timeMs: number;
+  petElement: string;
+}
+
+/** 上传自己的一局成绩（best-effort，写入后由 best_race_opponents 聚合最佳） */
+export async function uploadRaceScore(trackId: string, weatherId: string, timeMs: number, petElement: string): Promise<void> {
+  if (!supabase) return;
+  try {
+    await withTimeout(
+      supabase
+        .from('race_scores')
+        .insert({
+          fingerprint: getOrCreateFingerprint(),
+          track_id: trackId,
+          weather_id: weatherId,
+          time_ms: Math.round(timeMs),
+          pet_element: petElement,
+        }) as unknown as Promise<unknown>,
+    );
+  } catch (e) {
+    console.warn('[supabase] 成绩上传失败', e);
+  }
+}
+
+/** 拉取「当前赛道」上其他玩家的最佳成绩（排除自己）；无网/出错/超时返回 null（本地兜底） */
+export async function fetchRaceOpponents(trackId: string, limit = 5): Promise<RaceOpponent[] | null> {
+  if (!supabase) return null;
+  const fp = getOrCreateFingerprint();
+  try {
+    const res = (await withTimeout(
+      supabase.rpc('best_race_opponents', { p_track: trackId, p_exclude: fp, p_limit: limit }) as unknown as Promise<{
+        data: Array<{ fingerprint: string; time_ms: number; pet_element: string }> | null;
+        error: { message: string } | null;
+      }>,
+    )) as { data: Array<{ fingerprint: string; time_ms: number; pet_element: string }> | null; error: { message: string } | null } | null;
+    if (!res) return null; // 超时
+    if (res.error) {
+      console.warn('[supabase] 拉榜失败', res.error.message);
+      return null;
+    }
+    return (res.data || []).map((r) => ({ fingerprint: r.fingerprint, timeMs: r.time_ms, petElement: r.pet_element }));
+  } catch (e) {
+    console.warn('[supabase] 拉榜异常', e);
+    return null;
+  }
+}

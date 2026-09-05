@@ -7,6 +7,8 @@ import { useUserStore } from './useUserStore';
 import { useModulesStore, PET_META, PET_ELEMENTS } from './useModulesStore';
 import type { Racer, IRaceOpponentSource, RaceOpponentContext, RaceOpponentMode } from '@/constants/race';
 import { PET_PERSONALITY } from '@/constants/race';
+import type { RaceOpponent } from '@/services/supabase';
+import { uploadRaceScore } from '@/services/supabase';
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
 /** 本周键（用于周积分清零）：年 + 周一所在周序号 */
@@ -119,6 +121,9 @@ export const useRaceStore = defineStore('race', {
     titles: [] as string[],
     // —— 占用一致性：当前正在比赛的出战仙宠（防止赛跑与旅行重叠）——
     activeRacePet: null as ElementType | null,
+    // —— B4 异步对战：当前挑战对象（他人最佳成绩）与上一局对战结果 ——
+    challenge: null as { targetMs: number; petElement: string } | null,
+    lastChallenge: null as { win: boolean; myMs: number; targetMs: number; petElement: string } | null,
   }),
 
   getters: {
@@ -198,6 +203,40 @@ export const useRaceStore = defineStore('race', {
      */
     releaseRacePet() {
       this.activeRacePet = null;
+    },
+
+    /** B4 异步对战：设定挑战对象（他人的最佳成绩） */
+    setChallenge(opp: RaceOpponent) {
+      this.challenge = { targetMs: opp.timeMs, petElement: opp.petElement };
+      this.lastChallenge = null; // 新挑战覆盖上一局结果
+    },
+    /** 取消挑战 */
+    clearChallenge() {
+      this.challenge = null;
+      this.lastChallenge = null;
+    },
+    /** 仅清上一局对战结果（开赛前调用，保留当前挑战对象） */
+    clearLastChallenge() {
+      this.lastChallenge = null;
+    },
+    /**
+     * B4 异步对战：本局结束后调用。上传成绩到云端（best-effort），
+     * 若处于挑战中，则按「用时 ≤ 对方最佳」判定胜负并写入 lastChallenge。
+     */
+    submitRaceScore(durationMs: number, rank: number, petElement: ElementType) {
+      const modules = useModulesStore();
+      const trackId = modules.raceTrackSkin().id;
+      const weatherId = modules.raceWeather().id;
+      void uploadRaceScore(trackId, weatherId, durationMs, petElement); // 不阻塞
+      if (this.challenge) {
+        const win = durationMs <= this.challenge.targetMs;
+        this.lastChallenge = {
+          win,
+          myMs: Math.round(durationMs),
+          targetMs: this.challenge.targetMs,
+          petElement: this.challenge.petElement,
+        };
+      }
     },
 
     /**
