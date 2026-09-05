@@ -13,5 +13,8 @@ node_modules/
 *.log
 .DS_Store
 
+# vite 构建临时文件
+vite.config.ts.timestamp-*.mjs
+
 # 代码分析
 stats.html
