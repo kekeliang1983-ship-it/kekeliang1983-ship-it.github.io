@@ -152,8 +152,12 @@
 
     <!-- ============ 拜访（邻圃）sheet ============ -->
     <Overlay variant="sheet" :open="visitOpen" @close="visitOpen = false">
-      <h3 class="sheet-title">邻圃 · 友友 <span class="online-tag">联机后开启</span></h3>
-      <p class="hint">拜访好友菜地借走成熟作物（主人若在线守护将少借 50%）· 当前为预览，联机版本上线后可真实借产</p>
+      <h3 class="sheet-title">邻圃 · 友友 <span class="online-tag">{{ isSupabaseEnabled ? '联机中' : '预览' }}</span></h3>
+      <p class="hint">
+        {{ isSupabaseEnabled
+          ? '拜访真实玩家的菜地，借走成熟作物（对方结界符等级越高，你借走的越少）· 你装备结界符后，他人来访你时也会少借'
+          : '联机后将可真实借产；当前为预览，拜访不发放奖励' }}
+      </p>
       <div class="visit-list">
         <div class="friend" v-for="f in friends" :key="f.id">
           <div class="ava">{{ f.emoji }}</div>
@@ -165,6 +169,7 @@
             @click="onVisit(f)"
           >{{ f.disabled ? '未熟' : (modules.hasVisitedToday(f.id) ? '已拜访' : '拜访') }}</button>
         </div>
+        <div class="friend" v-if="friendsLoading"><div class="info"><p>正在寻访邻圃…</p></div></div>
       </div>
     </Overlay>
 
@@ -205,7 +210,7 @@
 
 <script setup lang="ts">
 defineOptions({ name: 'Farm' });
-import { ref, computed, onMounted, onUnmounted, onActivated, onDeactivated } from 'vue';
+import { ref, computed, watch, onMounted, onUnmounted, onActivated, onDeactivated } from 'vue';
 import { useUserStore, useModulesStore } from '@/stores/index';
 import { vFeedback, audio } from '@/core/feedback';
 import type { IPlot, ElementType, SeedQuality, CropId } from '@/types/index';
@@ -216,6 +221,7 @@ import { usePageIntro } from '@/composables/usePageIntro';
 import { useToast } from '@/composables/useToast';
 import { useConfirm } from '@/composables/useConfirm';
 import { visitService } from '@/services/visitService';
+import { isSupabaseEnabled, fetchRandomFarmFriends, uploadFarmSnapshot } from '@/services/supabase';
 import { useFloaters } from '@/composables/useFloaters';
 const { pushFloater, rectCenter } = useFloaters();
 
@@ -343,11 +349,55 @@ const seeds = computed(() => {
   });
 });
 
-const friends = ref([
-  { id: 1, emoji: '🦊', name: '小狐仙的菜地', level: 3, disabled: false },
-  { id: 2, emoji: '🐰', name: '兔子的菜地', level: 6, disabled: false },
-  { id: 3, emoji: '🐻', name: '熊大的菜地', level: 1, disabled: true },
-]);
+/** 邻圃好友条目（离线桩 / 在线真实玩家通用） */
+interface FriendItem {
+  id: number;
+  fingerprint?: string;   // 在线主人的 Supabase 指纹（离线桩无）
+  emoji: string;
+  name: string;
+  level: number;
+  amuletLevel: number;
+  amuletEquipped: boolean;
+  disabled: boolean;      // 作物未成熟（离线桩可置 true）
+}
+/** 离线预览用的假邻圃 */
+const STUB_FRIENDS: FriendItem[] = [
+  { id: 1, emoji: '🦊', name: '小狐仙的菜地', level: 3, amuletLevel: 0, amuletEquipped: false, disabled: false },
+  { id: 2, emoji: '🐰', name: '兔子的菜地', level: 6, amuletLevel: 0, amuletEquipped: false, disabled: false },
+  { id: 3, emoji: '🐻', name: '熊大的菜地', level: 1, amuletLevel: 0, amuletEquipped: false, disabled: true },
+];
+const friends = ref<FriendItem[]>(STUB_FRIENDS.map((f) => ({ ...f })));
+const friendsLoading = ref(false);
+
+/** 在线时拉取真实邻圃；失败/无网回退离线桩（friends 维持 STUB） */
+async function loadFriends() {
+  if (!isSupabaseEnabled) return;
+  friendsLoading.value = true;
+  const list = await fetchRandomFarmFriends(6);
+  friendsLoading.value = false;
+  if (list && list.length) {
+    friends.value = list.map((f, i) => ({
+      id: i + 1,
+      fingerprint: f.fingerprint,
+      emoji: ['🦊', '🐰', '🐻', '🐱', '🐼', '🦉'][i % 6],
+      name: `邻圃访客 #${f.fingerprint.slice(0, 4)}`,
+      level: f.level,
+      amuletLevel: f.amuletLevel,
+      amuletEquipped: f.amuletEquipped,
+      disabled: false,
+    }));
+  }
+}
+
+/** 主人结界符减借后的最终可借比例（百分数） */
+function finalPctOf(f: FriendItem): number {
+  const base = borrowablePct(f.level);
+  if (f.amuletEquipped && f.amuletLevel > 0) {
+    const reduction = Math.min(0.95, 0.2 * f.amuletLevel); // 满级(5)≈100% → 封顶保留 5%
+    return Math.max(0, Math.round(base * (1 - reduction)));
+  }
+  return base;
+}
 
 /* ---------- 计算属性 ---------- */
 const pendingVisits = computed(() => friends.value.filter((f) => !f.disabled && !modules.hasVisitedToday(f.id)).length);
@@ -385,10 +435,32 @@ const fengMainLabel = computed(() => {
 function borrowablePct(ownerLevel: number): number {
   return Math.max(5, 15 - (ownerLevel - 1));
 }
-function visitDesc(f: { level: number; disabled: boolean }): string {
+function visitDesc(f: FriendItem): string {
   if (f.disabled) return '尚未成熟，暂无可借';
-  return `作物已成熟，拜访可借走约 ${borrowablePct(f.level)}% 产量`;
+  const pct = finalPctOf(f);
+  const amulet = f.amuletEquipped && f.amuletLevel > 0 ? `（其结界符 Lv.${f.amuletLevel} 已减借）` : '';
+  return `作物已成熟，拜访可借走约 ${pct}% 产量${amulet}`;
 }
+
+/** 读自己的结界符运行态（等级/是否装备） */
+function myAmulet(): { level: number; equipped: boolean } {
+  const a = modules.artifacts.find((x) => x.id === 'amulet');
+  return { level: a?.level ?? 0, equipped: a?.equipped ?? false };
+}
+
+/** 上传自身防御快照（等级 + 结界符），供他人来访时计算减借 */
+async function syncMySnapshot() {
+  if (!isSupabaseEnabled) return;
+  const { level, equipped } = myAmulet();
+  await uploadFarmSnapshot(user.level, level, equipped);
+}
+
+/** 自身结界符签名（等级/装备态变化即重传快照） */
+const myAmuletSig = computed(() => {
+  const a = myAmulet();
+  return `${a.level}:${a.equipped ? 1 : 0}`;
+});
+watch(myAmuletSig, () => void syncMySnapshot());
 
 /* ---------- 工具方法 ---------- */
 function elementLabel(el: ElementType) { return FARM_ELEMENT_LABEL.value[el] ?? el; }
@@ -669,12 +741,24 @@ async function onExpand() {
   showToast(`扩建成功：解锁第 ${modules.unlockedPlots} 块${elementLabel(modules.plots[modules.unlockedPlots - 1].element)}地，消耗 ${price} 元宝`);
 }
 
-function onVisit(f: typeof friends.value[number]) {
+async function onVisit(f: FriendItem) {
   if (f.disabled || modules.hasVisitedToday(f.id)) return;
-  const pct = borrowablePct(f.level);
-  const res = visitService.borrow(f.id, f.level, pct); // 联机后替换为真实后端，调用方无需改动
-  showToast(res.note);
+  const finalPct = finalPctOf(f);
+  const res = visitService.borrow({
+    hostId: f.id,
+    hostFingerprint: f.fingerprint,
+    ownerLevel: f.level,
+    finalPct,
+    visitorLevel: user.level,
+  });
+  if (res.ok) {
+    if (res.borrowed.gold) user.changeCurrency('gold', res.borrowed.gold);
+    if (res.borrowed.pearl) user.changeCurrency('pearl', res.borrowed.pearl);
+    if (res.borrowed.magic) user.changeCurrency('magic', res.borrowed.magic);
+    audio.play('success');
+  }
   modules.recordVisit(f.id); // 记入今日已拜访（每日一次，刷新不重复）
+  showToast(res.note);
 }
 
 /* ---------- 时间引擎（绝对时间戳派生，跨页/后台/重启一致，与仙宠旅行同模型） ----------
@@ -735,9 +819,15 @@ onMounted(() => {
     first.stolenPercentage = 0;
     modules.farmDemoDone = true;
   }
+  // B3 联机：上传自身快照 + 拉取真实邻圃
+  void syncMySnapshot();
+  void loadFriends();
 });
 // keepAlive：首次挂载与切回前台都会触发 onActivated；切走触发 onDeactivated
-onActivated(() => startTimeEngine());
+onActivated(() => {
+  startTimeEngine();
+  void loadFriends(); // 切回前台刷新邻圃
+});
 onDeactivated(() => stopTimeEngine());
 onUnmounted(() => { stopTimeEngine(); });
 </script>

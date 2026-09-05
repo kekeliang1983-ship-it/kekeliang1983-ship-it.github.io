@@ -53,3 +53,87 @@ export async function fetchRandomDriftFromCloud(): Promise<{ emotion: string; te
     return null;
   }
 }
+
+// ============================================================
+// B3 访友（邻圃）：匿名玩家防御快照 + 真实借产
+// ============================================================
+
+/** 持久化匿名指纹：每台设备一份，作为 farm_snapshots 主键（不暴露任何个人信息） */
+const FP_KEY = 'cc_farm_fp';
+export function getOrCreateFingerprint(): string {
+  try {
+    let fp = localStorage.getItem(FP_KEY);
+    if (!fp) {
+      fp = (crypto.randomUUID?.() ?? `fp_${Date.now()}_${Math.random().toString(36).slice(2)}`);
+      localStorage.setItem(FP_KEY, fp);
+    }
+    return fp;
+  } catch {
+    return `fp_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  }
+}
+
+/** 邻圃玩家（来自他人上传的防御快照） */
+export interface FarmFriend {
+  fingerprint: string;
+  level: number;
+  amuletLevel: number;
+  amuletEquipped: boolean;
+}
+
+/** 上传自己的防御快照（等级 + 结界符状态），供他人来访时计算减借 */
+export async function uploadFarmSnapshot(level: number, amuletLevel: number, amuletEquipped: boolean): Promise<void> {
+  if (!supabase) return;
+  const fp = getOrCreateFingerprint();
+  try {
+    await withTimeout(
+      supabase
+        .from('farm_snapshots')
+        .upsert({ fingerprint: fp, level, amulet_level: amuletLevel, amulet_equipped: amuletEquipped }) as unknown as Promise<unknown>,
+    );
+  } catch (e) {
+    console.warn('[supabase] 快照上传失败', e);
+  }
+}
+
+/** 随机拉取若干邻圃玩家（排除自己）；无网/出错/超时返回 null（交由本地桩兜底） */
+export async function fetchRandomFarmFriends(limit = 6): Promise<FarmFriend[] | null> {
+  if (!supabase) return null;
+  const fp = getOrCreateFingerprint();
+  try {
+    const res = (await withTimeout(
+      supabase.rpc('random_farm_snapshots', { p_limit: limit, p_exclude: fp }) as unknown as Promise<{
+        data: Array<{ fingerprint: string; level: number; amulet_level: number; amulet_equipped: boolean }> | null;
+        error: { message: string } | null;
+      }>,
+    )) as { data: Array<{ fingerprint: string; level: number; amulet_level: number; amulet_equipped: boolean }> | null; error: { message: string } | null } | null;
+    if (!res) return null; // 超时
+    if (res.error) {
+      console.warn('[supabase] 拉邻圃失败', res.error.message);
+      return null;
+    }
+    return (res.data || []).map((r) => ({
+      fingerprint: r.fingerprint,
+      level: r.level,
+      amuletLevel: r.amulet_level,
+      amuletEquipped: r.amulet_equipped,
+    }));
+  } catch (e) {
+    console.warn('[supabase] 拉邻圃异常', e);
+    return null;
+  }
+}
+
+/** 记录一次拜访（best-effort，用于统计/未来防刷） */
+export async function recordFarmVisit(visitorFingerprint: string, hostFingerprint: string, borrowedPct: number): Promise<void> {
+  if (!supabase) return;
+  try {
+    await withTimeout(
+      supabase
+        .from('farm_visits')
+        .insert({ visitor_fp: visitorFingerprint, host_fp: hostFingerprint, borrowed_pct: borrowedPct }) as unknown as Promise<unknown>,
+    );
+  } catch (e) {
+    console.warn('[supabase] 记录拜访失败', e);
+  }
+}
