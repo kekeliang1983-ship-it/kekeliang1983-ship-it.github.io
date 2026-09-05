@@ -5,7 +5,7 @@ import { defineStore } from 'pinia';
 import type { ElementType } from '@/types/index';
 import { useUserStore } from './useUserStore';
 import { useModulesStore, PET_META, PET_ELEMENTS } from './useModulesStore';
-import type { Racer } from '@/constants/race';
+import type { Racer, IRaceOpponentSource, RaceOpponentContext, RaceOpponentMode } from '@/constants/race';
 import { PET_PERSONALITY } from '@/constants/race';
 
 const todayKey = () => new Date().toISOString().slice(0, 10);
@@ -51,6 +51,54 @@ export interface RaceResult {
   weeklyPoints: number;
   streakBonus: number;
   newTitles: string[];
+}
+
+/* —— 选手来源层实现（联机二期只换这一层，赛道表现层 RaceTrack.vue 不变） —— */
+const localBotOpponentSource: IRaceOpponentSource = {
+  mode: 'bot',
+  getOpponents(ctx: RaceOpponentContext) {
+    const pool = [...ctx.botNames];
+    const modules = useModulesStore();
+    const bots: Racer[] = [];
+    for (let i = 0; i < ctx.count; i++) {
+      const bel = pick(PET_ELEMENTS);
+      const nm = pool.length ? pool.splice(Math.floor(Math.random() * pool.length), 1)[0] : `灵宠${i + 1}`;
+      const botCond = rand(0.95, 1.05);
+      bots.push({
+        id: 'bot' + i,
+        name: nm,
+        emoji: PET_META[bel].emoji,
+        element: bel,
+        isPlayer: false,
+        baseSpeed: ctx.makeBase(bel, botCond),
+        speedFactor: modules.raceSpeedFactor(bel, ctx.trackElement),
+        personality: PET_PERSONALITY[bel],
+        teamBuffed: false,
+      });
+    }
+    return bots;
+  },
+};
+
+/**
+ * 在线真人对手来源（联机二期）：当前无后端，返回空数组 + 打 warn；
+ * beginRace 检测到空会自动回退本地 BOT，保证可玩。
+ * 接入后端后改为 async 匹配真人宠物填充此处（算法不变）。
+ */
+const onlineHumanOpponentSource: IRaceOpponentSource = {
+  mode: 'online',
+  getOpponents() {
+    console.warn('[race] 在线对手来源尚未接入后端，已回退本地 BOT');
+    return [];
+  },
+};
+
+/** 按 opponentMode 选择选手来源层；online 未就绪（返回空）时自动回退 bot */
+function selectRaceOpponents(ctx: RaceOpponentContext, mode: RaceOpponentMode): Racer[] {
+  const src: IRaceOpponentSource = mode === 'online' ? onlineHumanOpponentSource : localBotOpponentSource;
+  const opp = src.getOpponents(ctx);
+  if (opp.length === 0) return localBotOpponentSource.getOpponents(ctx); // 在线回退
+  return opp;
 }
 
 export const useRaceStore = defineStore('race', {
@@ -196,27 +244,11 @@ export const useRaceStore = defineStore('race', {
         teamBuffed: false,
       };
 
-      const namePool = [...rc.botNames];
-      const bots: Racer[] = [];
-      for (let i = 0; i < 5; i++) {
-        const bel = pick(PET_ELEMENTS);
-        const nm = pick(namePool);
-        const idx = namePool.indexOf(nm);
-        if (idx >= 0) namePool.splice(idx, 1);
-        const botCond = rand(0.95, 1.05);
-        const bPersonality = PET_PERSONALITY[bel];
-        bots.push({
-          id: 'bot' + i,
-          name: nm,
-          emoji: PET_META[bel].emoji,
-          element: bel,
-          isPlayer: false,
-          baseSpeed: makeBase(bel, botCond),
-          speedFactor: modules.raceSpeedFactor(bel, trackElement),
-          personality: bPersonality,
-          teamBuffed: false,
-        });
-      }
+      // —— 选手来源层（联机二期只换这一层；当前 opponentMode='bot'，online 未接入自动回退）——
+      const bots = selectRaceOpponents(
+        { count: 5, trackElement, botNames: rc.botNames, makeBase },
+        rc.opponentMode,
+      );
 
       const racers = [player, ...bots];
 

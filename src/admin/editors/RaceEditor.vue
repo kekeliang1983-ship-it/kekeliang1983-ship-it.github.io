@@ -157,6 +157,21 @@
         </div>
       </section>
 
+      <!-- ⑦Ⅳ 选手来源层（联机） -->
+      <section class="ed-sec">
+        <h4>⑦Ⅳ 选手来源层（联机）</h4>
+        <p class="ed-hint">联机二期只换这一层：'bot' 本地机器人（默认可玩）；'online' 联机真人（后端未接入时自动回退 bot）。</p>
+        <div class="ed-grid">
+          <label class="ed-field">
+            <span>对手来源</span>
+            <select v-model="cfg.opponentMode">
+              <option value="bot">本地机器人（可玩）</option>
+              <option value="online">联机真人（需后端）</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
       <!-- ⑧ 即时预览 -->
       <section class="ed-sec">
         <h4>⑧ 即时预览</h4>
@@ -240,6 +255,7 @@ watch(cfg, (c) => {
   c.comboStep = n(c.comboStep, 0.08);
   c.comboMax = n(c.comboMax, 3);
   c.teamBuffMult = n(c.teamBuffMult, 1.04);
+  c.opponentMode = (c.opponentMode === 'online' || c.opponentMode === 'bot') ? c.opponentMode : 'bot';
 }, { immediate: true, deep: false });
 </script>
 

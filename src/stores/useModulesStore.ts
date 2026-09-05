@@ -12,10 +12,12 @@ import { useUserStore, useRaceStore, NICKNAME_MIN, NICKNAME_MAX } from './index'
 import { EMOTIONS, BOTTLE_OVERFLOW, BOTTLE_MILESTONES, TRIPLE_LABEL, TRIPLE_THEME_CHANCE } from '@/constants/bottle';
 import { GALLERY_ELEMENTS, GALLERY_QUALITY_BONUS, DEFAULT_UNLOCKED, DAILY_FREE_COUNT, LEGENDARY_DAILY_LIMIT, type WallpaperQuality } from '@/constants/gallery';
 import { useContentStore } from './useContentStore';
+// 联机后端接入层（Supabase）：漂流瓶真·跨用户投递；未配置时自动降级本地
+import { pushDriftToCloud, fetchRandomDriftFromCloud } from '@/services/supabase';
 import { TRAVEL_CFG_MAP, TRAVEL_NOTES, HUNGER_DECAY_PER_MIN, HUNGER_TRAVEL_MIN, SPEED_UP_DAILY_LIMIT, PET_MAIN_NAME, PET_ELEMENT_LABEL, TRAVEL_MILESTONES, PET_FOODS } from '@/constants/pet';
 import type { ArtifactId } from '@/types/index';
 // 漂流瓶：运行时数值已全部收编进 bottleConfig.drift，此处仅借常量构造默认值
-import { DRIFT_SEND_DAILY, DRIFT_PICK_DAILY, DRIFT_INBOX_MAX, DRIFT_REWARD_CHANCE, DRIFT_REWARD_DOUBLE_CHANCE, DRIFT_REWARD_POOL, DRIFT_REWARD_META, DRIFT_WARM_WORDS, DRIFT_GENERIC } from '@/constants/drift';
+import { DRIFT_SEND_DAILY, DRIFT_PICK_DAILY, DRIFT_INBOX_MAX, DRIFT_REWARD_CHANCE, DRIFT_REWARD_DOUBLE_CHANCE, DRIFT_REWARD_POOL, DRIFT_REWARD_META, DRIFT_WARM_WORDS, DRIFT_GENERIC, DRIFT_EMOTION_SET } from '@/constants/drift';
 // 商店：运行时价目已收编进 farmConfig.shop，此处仅借常量构造默认值
 import { SHOP, CURRENCY_LABEL } from '@/constants/shop';
 // 灵田：运行时数值已全部收编进 farmConfig（后台 farm.json 覆盖），此处仅借常量构造默认值
@@ -34,7 +36,7 @@ import {
   RACE_BASE_SPEED, RACE_MAX_MS, RACE_DAILY_GOLD_CAP, RACE_DAILY_PEARL_CAP,
   RACE_EVENTS, RACE_TARGETED, RACE_EVENT_EVERY_MS, RACE_TARGETED_EVERY_MS,
   RANK_REWARDS, UPSET_BONUS, BOT_NAMES, RACE_TRACK_SKINS, RACE_WEATHERS,
-  type RaceEvent, type TargetedEvent, type RankReward, type RaceTrackSkin, type RaceWeather,
+  type RaceEvent, type TargetedEvent, type RankReward, type RaceTrackSkin, type RaceWeather, type RaceOpponentMode,
 } from '@/constants/race';
 // 签到：运行时数值已全部收编进 checkinConfig（后台 checkin.json 覆盖），此处仅借常量构造默认值
 import {
@@ -537,6 +539,8 @@ export interface RaceConfig {
   comboMax: number;
   /** 同元素结阵加成：某元素出现 >=2 只时，该元素全体 baseSpeed 乘此值 */
   teamBuffMult: number;
+  /** 选手来源层模式（联机二期）：'bot' 本地机器人 / 'online' 联机真人（未接入后端时自动回退 bot） */
+  opponentMode: RaceOpponentMode;
 }
 
 /** 默认竞速配置（对齐 constants/race.ts；后台 race.json 缺字段时逐项兜底） */
@@ -573,6 +577,7 @@ function buildDefaultRaceConfig(): RaceConfig {
     comboStep: 0.08,
     comboMax: 3,
     teamBuffMult: 1.04,
+    opponentMode: 'bot',
   };
 }
 
@@ -1483,6 +1488,7 @@ export const useModulesStore = defineStore('modules', {
         comboStep: num(remote.comboStep, base.comboStep),
         comboMax: num(remote.comboMax, base.comboMax),
         teamBuffMult: num(remote.teamBuffMult, base.teamBuffMult),
+        opponentMode: (remote.opponentMode === 'online' || remote.opponentMode === 'bot' ? remote.opponentMode : base.opponentMode),
       };
     },
 
@@ -2038,19 +2044,32 @@ export const useModulesStore = defineStore('modules', {
       d.driftedOutUsed += 1;
       d.driftedOutTotal += 1;
       useUserStore().changeMood(this.bottleConfig.moodPerDriftOut);
+      // 真·跨用户：推入公共瓶海（best-effort，不阻塞回执）
+      void pushDriftToCloud(emotion, t);
       return { success: true };
     },
 
     /**
      * 捞起一只漂流瓶（每日 1 次）
-     * 按近期情绪匹配本机暖语库，生成陌生人暖语入信箱（未读 → 消息 logo 红点）
+     * 优先从 Supabase 公共瓶海随机取一只他人真实瓶子（真·跨用户）；
+     * 未配置 / 离线 / 空海 / 超时 时降级为本机暖语库，行为不崩。
      */
-    pickDrift(): { success: boolean; reason?: 'limit'; message?: IDriftMessage } {
+    async pickDrift(): Promise<{ success: boolean; reason?: 'limit'; message?: IDriftMessage }> {
       this.normalizeDrift();
       if (this.driftBottle.pickedUsed >= this.bottleConfig.drift.pickDaily)
         return { success: false, reason: 'limit' };
-      const emotion = this.recentEmotion();
-      const text = pickWarmWordCfg(emotion, this.bottleConfig.drift.warmWords, this.bottleConfig.drift.generic);
+      const cloud = await fetchRandomDriftFromCloud();
+      let emotion: EmotionType | null;
+      let text: string;
+      let fromCloud = false;
+      if (cloud) {
+        emotion = DRIFT_EMOTION_SET.has(cloud.emotion) ? (cloud.emotion as EmotionType) : null;
+        text = cloud.text;
+        fromCloud = true;
+      } else {
+        emotion = this.recentEmotion();
+        text = pickWarmWordCfg(emotion, this.bottleConfig.drift.warmWords, this.bottleConfig.drift.generic);
+      }
       const msg: IDriftMessage = {
         id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         emotion: emotion ?? 'calm',
@@ -2058,6 +2077,7 @@ export const useModulesStore = defineStore('modules', {
         self: false,
         read: false,
         ts: Date.now(),
+        fromCloud,
       };
       const d = this.driftBottle;
       d.inbox.unshift(msg);

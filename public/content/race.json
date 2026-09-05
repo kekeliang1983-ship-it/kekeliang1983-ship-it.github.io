@@ -58,6 +58,7 @@
   "comboStep": 0.08,
   "comboMax": 3,
   "teamBuffMult": 1.04,
+  "opponentMode": "bot",
   "comfortLines": [
     "虽未夺魁，它叼回一朵野花递给你：「下次一定行！」",
     "垫底的小家伙在路边捡了颗糖，笑盈盈塞进你手心",

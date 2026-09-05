@@ -33,7 +33,7 @@
               <span class="d-tag" :style="{ color: meta(m.emotion).color }">
                 {{ meta(m.emotion).emoji }} {{ meta(m.emotion).label }}
               </span>
-              <span class="d-from">{{ m.self ? '你放流的' : '陌生人的暖语' }}</span>
+              <span class="d-from">{{ m.self ? '你放流的' : (m.fromCloud ? '🌍 来自远方的暖语' : '陌生人的暖语') }}</span>
               <span class="d-time">{{ fmtTime(m.ts) }}</span>
               <span v-if="!m.read" class="d-unread-dot"></span>
               <span v-else-if="m.favorite" class="d-fav">⭐</span>

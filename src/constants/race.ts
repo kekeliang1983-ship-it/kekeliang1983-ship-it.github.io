@@ -228,3 +228,30 @@ export interface Racer {
   /** 同元素结阵加成（赛前统计，>=2 只同元素则该元素全体获得 teamBuff）；仅展示用，速度已扑入 baseSpeed */
   teamBuffed: boolean;
 }
+
+/* ====================== 选手来源层（联机二期只换这一层） ====================== */
+/**
+ * 对手来源模式：
+ * - 'bot'    本地机器人（一期默认，纯前端可玩）
+ * - 'online' 联机真人（需后端匹配；未接入时自动回退 bot，保证可玩）
+ */
+export type RaceOpponentMode = 'bot' | 'online';
+
+/** 构建对手所需的上下文（由 beginRace 注入；来源层只消费、不关心赛道表现） */
+export interface RaceOpponentContext {
+  /** 需要的对手数量 */
+  count: number;
+  /** 今日赛道属性（用于五行系数展示） */
+  trackElement: ElementType;
+  /** 机器人命名池（来自 raceConfig.botNames） */
+  botNames: string[];
+  /** 基础速度构建闭包（已封装五行系数/状态/性格/皮肤/天气），来源层直接调用 */
+  makeBase: (el: ElementType, cond: number) => number;
+}
+
+/** 选手来源层接口：联机二期只替换此实现，赛道表现层（RaceTrack.vue）完全不变 */
+export interface IRaceOpponentSource {
+  mode: RaceOpponentMode;
+  /** 同步返回对手 Racer[]；在线模式若后端未就绪可返回空数组，由调用方回退 */
+  getOpponents(ctx: RaceOpponentContext): Racer[];
+}

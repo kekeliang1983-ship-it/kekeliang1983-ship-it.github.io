@@ -195,6 +195,7 @@ export interface IDriftMessage {
   favorite?: boolean;     // 是否已珍藏（珍藏的永不离箱，留在「珍藏架」）
   reward?: DriftReward[]; // 首次读信时掉落的喜悦奖励（仅陌生人暖语会掉）
   ts: number;             // 生成时间戳（ms）
+  fromCloud?: boolean;    // true=来自 Supabase 公共瓶海（真·跨用户）；undefined=本机生成/自己放流
 }
 
 /** 读信掉落奖励：金币(元宝)/魔丸/灵珠，不含天玑 */

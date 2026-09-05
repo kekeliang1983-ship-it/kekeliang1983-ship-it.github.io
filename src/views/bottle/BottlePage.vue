@@ -410,14 +410,14 @@ function confirmSend(ev?: Event) {
   sendOpen.value = false;
   sendText.value = '';
 }
-function onPick(ev?: Event) {
+async function onPick(ev?: Event) {
   if (!canPick.value) { showToast('今日已捞起，明天再来 🪣'); return; }
-  const r = modulesStore.pickDrift();
+  const r = await modulesStore.pickDrift();
   if (!r.success) return;
   audio.play('soft');
   const c = rectCenter(ev?.currentTarget as Element | undefined);
   pushFloater({ x: c.x, y: c.y - 14, text: '心境 +1', kind: 'mood', duration: 1300 });
-  showToast('🪣 捞起一只漂流瓶，暖话已漂进信箱');
+  showToast(r.message?.fromCloud ? '🌍 捞起一只远方的漂流瓶，暖话已漂进信箱' : '🪣 捞起一只漂流瓶，暖话已漂进信箱');
 }
 
 /* ---------- 中途「小灵光」庆祝卡 ---------- */

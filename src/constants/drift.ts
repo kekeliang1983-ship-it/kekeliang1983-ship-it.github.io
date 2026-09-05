@@ -6,6 +6,11 @@ import type { EmotionType } from '@/types/index';
 /** 每日放流 / 捞起上限（克制：每天各 1 次，不堆货币、不强求） */
 export const DRIFT_SEND_DAILY = 1;
 export const DRIFT_PICK_DAILY = 1;
+
+/** 合法情绪集合：用于校验云端瓶子携带的 emotion 字段，避免脏数据进信箱 */
+export const DRIFT_EMOTION_SET = new Set<string>([
+  'joy', 'calm', 'anger', 'sorrow', 'surprise', 'miss', 'weary', 'hope',
+]);
 /** 信箱最多保留条数（超出丢弃最旧） */
 export const DRIFT_INBOX_MAX = 30;
 
