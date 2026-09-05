@@ -1,0 +1,20 @@
+{
+  "makeupCost": 20,
+  "days": [
+    { "day": 1, "reward": { "gold": 50 }, "quote": "一签落，灵气自生。" },
+    { "day": 2, "reward": { "gold": 60, "pearl": 5 }, "quote": "再签一愿，珠玉相随。" },
+    { "day": 3, "reward": { "gold": 70 }, "quote": "三签成愿，福缘渐厚。" },
+    { "day": 4, "reward": { "gold": 80, "magic": 3 }, "quote": "四时安稳，魔丸入袖。" },
+    { "day": 5, "reward": { "gold": 90, "pearl": 10 }, "quote": "五福临门，灵珠盈掌。" },
+    { "day": 6, "reward": { "gold": 110 }, "quote": "六合顺遂，只差一步。" },
+    { "day": 7, "reward": { "gold": 188, "jade": 1 }, "quote": "七日功成，天玑在手。" }
+  ],
+  "milestones": [
+    { "days": 3, "reward": { "gold": 100, "pearl": 5 }, "title": "初结灵缘", "emoji": "🌱" },
+    { "days": 7, "reward": { "gold": 100, "pearl": 20 }, "title": "七日不辍", "emoji": "🌿" },
+    { "days": 15, "reward": { "gold": 300, "magic": 10 }, "title": "半月深耕", "emoji": "🌳" },
+    { "days": 30, "reward": { "gold": 500, "jade": 2 }, "title": "月满灵签", "emoji": "🌕" },
+    { "days": 60, "reward": { "gold": 500, "pearl": 88, "magic": 20 }, "title": "两月如一", "emoji": "🏔️" },
+    { "days": 100, "reward": { "gold": 1000, "jade": 5 }, "title": "百日道成", "emoji": "☯️" }
+  ]
+}

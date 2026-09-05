@@ -1,0 +1,446 @@
+{
+  "wallpapers": [
+    {
+      "id": "wp_001",
+      "name": "金鳞祥云",
+      "element": "gold",
+      "quality": "common",
+      "price": {
+        "gold": 30
+      },
+      "emoji": "🪙"
+    },
+    {
+      "id": "wp_002",
+      "name": "灵木逢春",
+      "element": "wood",
+      "quality": "common",
+      "price": {
+        "gold": 30
+      },
+      "emoji": "🌳"
+    },
+    {
+      "id": "wp_003",
+      "name": "清泉映月",
+      "element": "water",
+      "quality": "common",
+      "price": {
+        "gold": 30
+      },
+      "emoji": "💧"
+    },
+    {
+      "id": "wp_004",
+      "name": "烈焰焚天",
+      "element": "fire",
+      "quality": "common",
+      "price": {
+        "gold": 30
+      },
+      "emoji": "🔥"
+    },
+    {
+      "id": "wp_005",
+      "name": "厚土载物",
+      "element": "earth",
+      "quality": "common",
+      "price": {
+        "gold": 30
+      },
+      "emoji": "⛰️"
+    },
+    {
+      "id": "wp_006",
+      "name": "金秋送爽",
+      "element": "gold",
+      "quality": "common",
+      "price": {
+        "gold": 30
+      },
+      "emoji": "🍂"
+    },
+    {
+      "id": "wp_007",
+      "name": "木秀于林",
+      "element": "wood",
+      "quality": "common",
+      "price": {
+        "gold": 30
+      },
+      "emoji": "🌲"
+    },
+    {
+      "id": "wp_008",
+      "name": "水天一色",
+      "element": "water",
+      "quality": "common",
+      "price": {
+        "gold": 30
+      },
+      "emoji": "🌊"
+    },
+    {
+      "id": "wp_009",
+      "name": "火树银花",
+      "element": "fire",
+      "quality": "common",
+      "price": {
+        "gold": 30
+      },
+      "emoji": "🌋"
+    },
+    {
+      "id": "wp_010",
+      "name": "土生万物",
+      "element": "earth",
+      "quality": "common",
+      "price": {
+        "gold": 30
+      },
+      "emoji": "🪨"
+    },
+    {
+      "id": "wp_011",
+      "name": "金辉流转",
+      "element": "gold",
+      "quality": "uncommon",
+      "price": {
+        "pearl": 20
+      },
+      "emoji": "✨"
+    },
+    {
+      "id": "wp_012",
+      "name": "木影婆娑",
+      "element": "wood",
+      "quality": "uncommon",
+      "price": {
+        "pearl": 20
+      },
+      "emoji": "🍃"
+    },
+    {
+      "id": "wp_013",
+      "name": "水韵悠长",
+      "element": "water",
+      "quality": "uncommon",
+      "price": {
+        "pearl": 20
+      },
+      "emoji": "💦"
+    },
+    {
+      "id": "wp_014",
+      "name": "火光摇曳",
+      "element": "fire",
+      "quality": "uncommon",
+      "price": {
+        "pearl": 20
+      },
+      "emoji": "🕯️"
+    },
+    {
+      "id": "wp_015",
+      "name": "土润万物",
+      "element": "earth",
+      "quality": "uncommon",
+      "price": {
+        "pearl": 20
+      },
+      "emoji": "🌾"
+    },
+    {
+      "id": "wp_016",
+      "name": "星辰·金",
+      "element": "gold",
+      "quality": "uncommon",
+      "price": {
+        "pearl": 20
+      },
+      "emoji": "🌟"
+    },
+    {
+      "id": "wp_017",
+      "name": "星辰·木",
+      "element": "wood",
+      "quality": "uncommon",
+      "price": {
+        "pearl": 20
+      },
+      "emoji": "🌟"
+    },
+    {
+      "id": "wp_018",
+      "name": "星辰·水",
+      "element": "water",
+      "quality": "uncommon",
+      "price": {
+        "pearl": 20
+      },
+      "emoji": "🌟"
+    },
+    {
+      "id": "wp_019",
+      "name": "日月同辉·金",
+      "element": "gold",
+      "quality": "legendary",
+      "price": {
+        "magic": 15,
+        "jade": 1
+      },
+      "emoji": "🌌"
+    },
+    {
+      "id": "wp_020",
+      "name": "日月同辉·木",
+      "element": "wood",
+      "quality": "legendary",
+      "price": {
+        "magic": 15,
+        "jade": 1
+      },
+      "emoji": "🌌"
+    },
+    {
+      "id": "wp_021",
+      "name": "日月同辉·水",
+      "element": "water",
+      "quality": "legendary",
+      "price": {
+        "magic": 15,
+        "jade": 1
+      },
+      "emoji": "🌌"
+    },
+    {
+      "id": "wp_022",
+      "name": "日月同辉·火",
+      "element": "fire",
+      "quality": "legendary",
+      "price": {
+        "magic": 15,
+        "jade": 1
+      },
+      "emoji": "🌌"
+    },
+    {
+      "id": "wp_023",
+      "name": "日月同辉·土",
+      "element": "earth",
+      "quality": "legendary",
+      "price": {
+        "magic": 15,
+        "jade": 1
+      },
+      "emoji": "🌌"
+    },
+    {
+      "id": "wp_024",
+      "name": "混沌初开",
+      "element": "fire",
+      "quality": "legendary",
+      "price": {
+        "magic": 15,
+        "jade": 1
+      },
+      "emoji": "🌀"
+    },
+    {
+      "id": "wp_025",
+      "name": "星辉·土",
+      "element": "earth",
+      "quality": "legendary",
+      "price": {
+        "magic": 15,
+        "jade": 1
+      },
+      "emoji": "🌠"
+    },
+    {
+      "id": "wp_026",
+      "name": "九尾奇缘",
+      "element": "gold",
+      "quality": "common",
+      "price": {},
+      "emoji": "🦊",
+      "src": "/wallpapers/wp_026.png",
+      "originalSrc": "/originals/wp_026.png"
+    },
+    {
+      "id": "wp_027",
+      "name": "云光伴身",
+      "element": "water",
+      "quality": "common",
+      "price": {},
+      "emoji": "☁️",
+      "src": "/wallpapers/wp_027.png",
+      "originalSrc": "/originals/wp_027.png"
+    },
+    {
+      "id": "wp_028",
+      "name": "星晶九尾",
+      "element": "gold",
+      "quality": "common",
+      "price": {},
+      "emoji": "✨",
+      "src": "/wallpapers/wp_028.png",
+      "originalSrc": "/originals/wp_028.png"
+    },
+    {
+      "id": "wp_029",
+      "name": "玄猫衔月",
+      "element": "water",
+      "quality": "common",
+      "price": {},
+      "emoji": "🐱",
+      "src": "/wallpapers/wp_029.png",
+      "originalSrc": "/originals/wp_029.png"
+    },
+    {
+      "id": "wp_030",
+      "name": "玉魄栖云",
+      "element": "gold",
+      "quality": "common",
+      "price": {},
+      "emoji": "🌟",
+      "src": "/wallpapers/wp_030.png",
+      "originalSrc": "/originals/wp_030.png"
+    },
+    {
+      "id": "wp_031",
+      "name": "玉龙衔星",
+      "element": "gold",
+      "quality": "common",
+      "price": {},
+      "emoji": "🐉",
+      "src": "/wallpapers/wp_031.png",
+      "originalSrc": "/originals/wp_031.png"
+    },
+    {
+      "id": "wp_032",
+      "name": "瑶台衔禄",
+      "element": "gold",
+      "quality": "common",
+      "price": {},
+      "emoji": "🏯",
+      "src": "/wallpapers/wp_032.png",
+      "originalSrc": "/originals/wp_032.png"
+    },
+    {
+      "id": "wp_033",
+      "name": "福猫纳财",
+      "element": "gold",
+      "quality": "common",
+      "price": {},
+      "emoji": "🐈",
+      "src": "/wallpapers/wp_033.png",
+      "originalSrc": "/originals/wp_033.png"
+    },
+    {
+      "id": "wp_034",
+      "name": "鎏金跃兔",
+      "element": "gold",
+      "quality": "common",
+      "price": {},
+      "emoji": "🐇",
+      "src": "/wallpapers/wp_034.png",
+      "originalSrc": "/originals/wp_034.png"
+    },
+    {
+      "id": "wp_035",
+      "name": "青丘之狐",
+      "element": "wood",
+      "quality": "common",
+      "price": {},
+      "emoji": "🦊",
+      "src": "/wallpapers/wp_035.png",
+      "originalSrc": "/originals/wp_035.png"
+    }
+  ],
+  "hidden": [
+    {
+      "id": "hwp_s1",
+      "name": "幽兰秘境",
+      "element": "wood",
+      "quality": "uncommon",
+      "price": {},
+      "emoji": "🌿",
+      "hidden": true,
+      "pool": "spirit"
+    },
+    {
+      "id": "hwp_s2",
+      "name": "月隐寒潭",
+      "element": "water",
+      "quality": "uncommon",
+      "price": {},
+      "emoji": "🌙",
+      "hidden": true,
+      "pool": "spirit"
+    },
+    {
+      "id": "hwp_s3",
+      "name": "星落残垣",
+      "element": "gold",
+      "quality": "uncommon",
+      "price": {},
+      "emoji": "🪐",
+      "hidden": true,
+      "pool": "spirit"
+    },
+    {
+      "id": "hwp_l1",
+      "name": "九霄遗珠",
+      "element": "gold",
+      "quality": "legendary",
+      "price": {},
+      "emoji": "💠",
+      "hidden": true,
+      "pool": "legend"
+    },
+    {
+      "id": "hwp_l2",
+      "name": "太虚心印",
+      "element": "fire",
+      "quality": "legendary",
+      "price": {},
+      "emoji": "🔆",
+      "hidden": true,
+      "pool": "legend"
+    },
+    {
+      "id": "hwp_l3",
+      "name": "混沌初醒",
+      "element": "fire",
+      "quality": "legendary",
+      "price": {},
+      "emoji": "🌀",
+      "hidden": true,
+      "pool": "legend"
+    }
+  ],
+  "collections": [
+    {
+      "id": "featured",
+      "label": "精选",
+      "icon": "⭐",
+      "order": 1,
+      "enabled": true,
+      "ids": [
+        "wp_019",
+        "wp_020",
+        "wp_021",
+        "wp_022",
+        "wp_023",
+        "wp_024",
+        "wp_025",
+        "wp_016",
+        "wp_017",
+        "wp_018",
+        "wp_026",
+        "wp_031"
+      ]
+    }
+  ]
+}

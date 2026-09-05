@@ -1,0 +1,70 @@
+{
+  "elements": ["gold", "wood", "water", "fire", "earth"],
+  "params": {
+    "hungerDecayPerMin": 1,
+    "hungerHappinessFactor": 0.7,
+    "hungerTravelMin": 20,
+    "speedUpDailyLimit": 2,
+    "strokeCoolMs": 180000,
+    "strokeGainSmall": 3,
+    "strokeGainBig": 12,
+    "strokeMoodBig": 2,
+    "multElement": 1.15,
+    "multFirstDaily": 1.5,
+    "multLively": 1.1,
+    "dailyRewardGold": 30,
+    "livelyThreshold": 80
+  },
+  "pets": [
+    { "element": "gold", "name": "白泽", "emoji": "🦅", "image": "", "elementLabel": "金系", "nickname": "金系精灵", "unlockJade": 2, "desc": "金系精灵 · 锐利而忠诚" },
+    { "element": "wood", "name": "夫诸", "emoji": "🦌", "image": "", "elementLabel": "木系", "nickname": "木系精灵", "unlockJade": 2, "desc": "木系精灵 · 温润而生长" },
+    { "element": "water", "name": "文鳐", "emoji": "🐢", "image": "", "elementLabel": "水系", "nickname": "水系精灵", "unlockJade": 2, "desc": "水系精灵 · 灵秀而包容" },
+    { "element": "fire", "name": "毕方", "emoji": "🦊", "image": "", "elementLabel": "火系", "nickname": "火系精灵", "unlockJade": 2, "desc": "火系精灵 · 热烈而灵动" },
+    { "element": "earth", "name": "貔貅", "emoji": "🐻", "image": "", "elementLabel": "土系", "nickname": "土系精灵", "unlockJade": 2, "desc": "土系精灵 · 沉稳而可靠" }
+  ],
+  "foods": [
+    { "type": "dry", "emoji": "🥮", "name": "宠物干粮", "desc": "基础口粮 · 饱食 +20 · 短途口粮", "hungerGain": 20, "priceType": "gold", "price": 5 },
+    { "type": "premium", "emoji": "🍙", "name": "宠物精粮", "desc": "精制口粮 · 饱食 +35 · 长途/远行口粮", "hungerGain": 35, "priceType": "pearl", "price": 5 }
+  ],
+  "travels": [
+    {
+      "id": "taijing", "name": "苔径", "element": "wood", "hours": 0.25, "food": "dry", "foodQty": 1,
+      "rewards": { "gold": 10, "pearl": 0, "magic": 0 }, "drops": {}, "unlockAt": 0,
+      "milestones": ["它踏上了苔径，露水打湿了爪尖", "林子深处传来溪声，它停下来听了很久", "前面有萤火聚成一小团，它放轻了脚步"],
+      "notes": ["在苔径的石缝间追着萤火跑了半刻，鞋尖沾了露水", "帮溪边洗衣的婆婆递了块皂角，得了一颗野莓", "躺在青苔上晒了一会儿太阳，听见地底有细碎的响动", "和一只路过的松鼠对峙了三秒，它赢了那枚松果"]
+    },
+    {
+      "id": "huaxin", "name": "花信屿", "element": "fire", "hours": 0.5, "food": "dry", "foodQty": 1,
+      "rewards": { "gold": 18, "pearl": 0, "magic": 0 }, "drops": {}, "unlockAt": 0,
+      "milestones": ["风里已经有了甜味，它加快了脚步", "花田翻起一层浪，它一头扎了进去", "它在一株最大的花下坐了会儿，像是在等谁"],
+      "notes": ["花信屿的风里全是甜香，它替新娘递了一回花笺", "在花田里打滚，回来时绒毛上缀着星星点点的粉", "遇见一只迷路的蝶，一路护送它到了对岸", "偷尝了半口花蜜，被蜂群追着绕树三圈"]
+    },
+    {
+      "id": "fengling", "name": "风铃坞", "element": "gold", "hours": 1, "food": "dry", "foodQty": 1,
+      "rewards": { "gold": 35, "pearl": 0, "magic": 0 }, "drops": { "jadeChance": 0.01 }, "unlockAt": 0,
+      "milestones": ["远远就听见铃声，它竖起了耳朵", "檐下挂满铜铃，它在风里转了个圈", "它替守铃的人摇了一阵，铃声散进了山谷"],
+      "notes": ["风铃坞的檐角挂满铜铃，它替守铃的老妪摇了一夜清音", "在风里接住了一封被吹走的信，物归原主得了句道谢", "顺着铃声攀上高台，看见远山如黛", "和路过的小童比赛吹叶笛，输了一颗糖"]
+    },
+    {
+      "id": "yunmeng", "name": "云梦泽", "element": "water", "hours": 3, "food": "premium", "foodQty": 1,
+      "magicHours": 1.5, "magicCost": 15,
+      "rewards": { "gold": 100, "pearl": 10, "magic": 0 }, "drops": { "jadeChance": 0.03 }, "unlockAt": 3,
+      "milestones": ["雾从水面漫上来，它的身影淡了些", "泽心有光一闪，它停下看了很久", "雾开始散了，对岸的轮廓慢慢清楚"],
+      "notes": ["云梦泽的雾散开时，水面浮起一座不曾存在的桥", "在泽边遇见一条会发光的水蛇，它衔来一粒珍珠", "听渔人讲了半宿旧事，临走塞给它一壶温酒", "在芦苇深处拾得一枚褪色的铃铛"]
+    },
+    {
+      "id": "xinghe", "name": "星河渡", "element": "earth", "hours": 6, "food": "premium", "foodQty": 1,
+      "magicHours": 3, "magicCost": 30,
+      "rewards": { "gold": 190, "pearl": 22, "magic": 3 }, "drops": { "jadeChance": 0.06, "hiddenChance": 0.06, "hiddenPool": "spirit" }, "unlockAt": 8,
+      "milestones": ["天色暗下来，第一颗星浮出了水面", "它上了船，星子落了满身", "船靠岸的声响很轻，它回头望了一眼"],
+      "notes": ["星河渡的船夫说，对岸有人在等一封迟了百年的信", "它替渡口的灯添了油，整夜星子都落进了水里", "在船头数星星，数到第一千颗时许了个愿", "遇见撑船的女子，赠它一片会发光的鳞"]
+    },
+    {
+      "id": "taixu", "name": "太虚境", "element": "chaos", "hours": 12, "food": "premium", "foodQty": 1,
+      "magicHours": 6, "magicCost": 60,
+      "rewards": { "gold": 360, "pearl": 45, "magic": 8 }, "drops": { "jadeGuarantee": 1, "hiddenChance": 0.15, "hiddenPool": "legend" }, "unlockAt": 20,
+      "milestones": ["没有方向，也没有远近，它只是往前", "周围安静得能听见自己的心跳", "前面好像有光，很淡，但它认得"],
+      "notes": ["太虚境没有尽头，它走了一程，回头已不见来路", "在混沌里拾得一枚半明半灭的珠，握久了竟暖起来", "听见极远的地方有人在抚琴，弦音落成了雪", "于无形中照见了自己的影子，与它对了很久的眸"]
+    }
+  ]
+}

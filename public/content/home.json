@@ -1,0 +1,57 @@
+{
+  "background": {
+    "image": "/content/images/home_bg.jpg?t=1788375077044",
+    "opacity": 1,
+    "blur": 0
+  },
+  "quote": {
+    "title": "今日心语",
+    "refreshText": "换一句",
+    "cardImage": "/content/images/home_quote_card.jpg?t=1788369252869",
+    "flowerImage": ""
+  },
+  "features": [
+    {
+      "id": "farm",
+      "name": "灵植",
+      "icon": "",
+      "cardImage": ""
+    },
+    {
+      "id": "music",
+      "name": "天籁",
+      "icon": "",
+      "cardImage": ""
+    },
+    {
+      "id": "pet",
+      "name": "仙宠",
+      "icon": "",
+      "cardImage": ""
+    },
+    {
+      "id": "gallery",
+      "name": "画境",
+      "icon": "",
+      "cardImage": ""
+    },
+    {
+      "id": "shrine",
+      "name": "神龛",
+      "icon": "",
+      "cardImage": ""
+    },
+    {
+      "id": "artifacts",
+      "name": "法器",
+      "icon": "",
+      "cardImage": ""
+    },
+    {
+      "id": "bottle",
+      "name": "情绪瓶",
+      "icon": "",
+      "cardImage": ""
+    }
+  ]
+}

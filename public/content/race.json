@@ -1,0 +1,68 @@
+{
+  "dailyFree": 5,
+  "paidCost": 15,
+  "paidDailyLimit": 5,
+  "cooldownMs": 3000,
+  "baseSpeed": 0.05,
+  "maxMs": 32000,
+  "dailyGoldCap": 200,
+  "dailyPearlCap": 40,
+  "trackOrder": ["wood", "fire", "earth", "gold", "water"],
+  "engender": { "wood": "fire", "fire": "earth", "earth": "gold", "gold": "water", "water": "wood" },
+  "restrain": { "wood": "earth", "fire": "gold", "earth": "water", "gold": "wood", "water": "fire" },
+  "events": [
+    { "id": "wind", "emoji": "🌬️", "label": "御风", "mult": 1.35, "durMs": 1500, "weight": 3 },
+    { "id": "cloud", "emoji": "☁️", "label": "踩云", "mult": 0.6, "durMs": 1500, "weight": 3 },
+    { "id": "herb", "emoji": "🌿", "label": "灵草", "mult": 1.22, "durMs": 1200, "weight": 2 },
+    { "id": "fox", "emoji": "🦊", "label": "绊脚", "mult": 0.65, "durMs": 1300, "weight": 2 },
+    { "id": "thunder", "emoji": "⚡", "label": "雷劫", "mult": 0.55, "durMs": 1200, "weight": 2 },
+    { "id": "peach", "emoji": "🍑", "label": "蟠桃", "mult": 1.25, "durMs": 1200, "weight": 2 },
+    { "id": "nap", "emoji": "💤", "label": "打盹", "mult": 0.55, "durMs": 1400, "weight": 2 },
+    { "id": "fire", "emoji": "🔥", "label": "火遁", "mult": 1.3, "durMs": 1200, "weight": 2 },
+    { "id": "whirl", "emoji": "🌀", "label": "旋风", "mult": 0.72, "durMs": 1100, "weight": 2 }
+  ],
+  "targeted": [
+    { "id": "rock", "emoji": "🪨", "label": "扔石头", "mult": 0.5, "durMs": 1300, "weight": 3, "target": "leader", "hitEmoji": "💥" },
+    { "id": "candy", "emoji": "🍬", "label": "喂仙丹", "mult": 1.32, "durMs": 1300, "weight": 3, "target": "tail", "hitEmoji": "✨" },
+    { "id": "mud", "emoji": "💩", "label": "甩泥巴", "mult": 0.62, "durMs": 1200, "weight": 2, "target": "leader", "hitEmoji": "💫" }
+  ],
+  "eventEveryMs": 1100,
+  "targetedEveryMs": 2600,
+  "rankRewards": {
+    "1": { "gold": 50, "pearl": 5 },
+    "2": { "gold": 30, "pearl": 2 },
+    "3": { "gold": 18, "pearl": 0 },
+    "4": { "gold": 10, "pearl": 0 },
+    "5": { "gold": 5, "pearl": 0 },
+    "6": { "gold": 3, "pearl": 0, "comfort": true }
+  },
+  "upsetBonus": { "gold": 15 },
+  "botNames": [
+    "驺吾", "九尾", "帝江", "穷奇", "梼杌", "饕餮",
+    "椒图", "蒲牢", "狻猊", "当康", "英招", "陆吾",
+    "开明", "钦原", "蜚", "化蛇", "讹兽", "长右"
+  ],
+  "tracks": [
+    { "id": "meadow", "name": "茸茸草甸", "emoji": "🌿", "bg": "linear-gradient(135deg, #eaf6ec, #dcefe6)", "speedMult": 1.0, "eventRateMult": 1.0 },
+    { "id": "snow", "name": "落雪原野", "emoji": "❄️", "bg": "linear-gradient(135deg, #eef4fb, #dde7f3)", "speedMult": 0.92, "eventRateMult": 1.4 },
+    { "id": "night", "name": "樱夜星河", "emoji": "🌸", "bg": "linear-gradient(135deg, #2b2440, #3a2f52)", "speedMult": 1.05, "eventRateMult": 1.0 },
+    { "id": "aurora", "name": "极光之径", "emoji": "🌌", "bg": "linear-gradient(135deg, #1f3a4d, #2a4a6b)", "speedMult": 1.1, "eventRateMult": 0.85 }
+  ],
+  "weather": [
+    { "id": "sunny", "name": "晴空微风", "emoji": "🌤️", "speedMult": 1.03, "eventRateMult": 1.0 },
+    { "id": "tailwind", "name": "顺风疾驰", "emoji": "🌬️", "bg": "linear-gradient(135deg, #dff1ff, #cfe8ff)", "speedMult": 1.08, "eventRateMult": 1.1 },
+    { "id": "drizzle", "name": "细雨绵绵", "emoji": "🌧️", "bg": "linear-gradient(135deg, #e3eaf0, #d2dbe4)", "speedMult": 0.94, "eventRateMult": 1.15 },
+    { "id": "mist", "name": "薄雾朦胧", "emoji": "🌫️", "speedMult": 1.0, "eventRateMult": 0.9 },
+    { "id": "storm", "name": "雷暴将至", "emoji": "⛈️", "bg": "linear-gradient(135deg, #3a3550, #4a4366)", "speedMult": 1.05, "eventRateMult": 1.3 }
+  ],
+  "comboStep": 0.08,
+  "comboMax": 3,
+  "teamBuffMult": 1.04,
+  "comfortLines": [
+    "虽未夺魁，它叼回一朵野花递给你：「下次一定行！」",
+    "垫底的小家伙在路边捡了颗糖，笑盈盈塞进你手心",
+    "它慢悠悠晃回来，尾巴尖还沾着草叶，一点也不沮丧",
+    "最后一名也值得掌声——它朝你比了个萌萌的爪",
+    "它没赢，却带回一片发亮的叶子，说「这个送你当安慰」"
+  ]
+}

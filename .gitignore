@@ -1,0 +1,17 @@
+# 构建产物（含历次规避 EPERM 用的 dist-relN / dist2 / dist_deploy / dist-single / dist-tmp / dist_xxx 等变体）
+dist/
+dist*/
+node_modules/
+
+# 环境变量敏感文件
+.env
+.env.local
+.env.*.local
+
+# 调试
+.vite/
+*.log
+.DS_Store
+
+# 代码分析
+stats.html

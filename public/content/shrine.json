@@ -1,0 +1,85 @@
+{
+  "params": {
+    "buffCeil": 0.45,
+    "incenseQiCost": 10,
+    "fortuneQiCost": 10,
+    "firstIncenseReward": 5,
+    "couponValueGold": 20,
+    "pressMs": 3000,
+    "maxWishes": 20,
+    "firstRewardCurrencies": ["gold", "pearl", "magic", "jade"]
+  },
+  "incenses": [
+    {
+      "type": "incense_basic",
+      "name": "线香",
+      "emoji": "🕯️",
+      "image": "",
+      "cost": { "currency": "gold", "amount": 5 },
+      "durationHours": 1,
+      "buff": 0.05,
+      "desc": "神恩 1 小时 · 收益 +5%",
+      "special": "",
+      "refundRate": 0,
+      "guaranteeTop": false,
+      "glow": "rgba(240,180,120,.45)"
+    },
+    {
+      "type": "incense_mid",
+      "name": "檀香",
+      "emoji": "🌸",
+      "image": "",
+      "cost": { "currency": "pearl", "amount": 10 },
+      "durationHours": 4,
+      "buff": 0.15,
+      "desc": "神恩 4 小时 · 收益 +15%",
+      "special": "10% 概率返还消耗灵珠",
+      "refundRate": 0.1,
+      "guaranteeTop": false,
+      "glow": "rgba(200,150,230,.45)"
+    },
+    {
+      "type": "incense_high",
+      "name": "龙涎香",
+      "emoji": "🐉",
+      "image": "",
+      "cost": { "currency": "magic", "amount": 8 },
+      "durationHours": 12,
+      "buff": 0.30,
+      "desc": "神恩 12 小时 · 收益 +30%",
+      "special": "必得上上签 x1（可兑 20 元宝）",
+      "refundRate": 0,
+      "guaranteeTop": true,
+      "glow": "rgba(120,200,255,.5)"
+    }
+  ],
+  "deities": [
+    { "id": "wealth",  "name": "财神", "emoji": "🧧", "image": "", "blessing": "庇佑元宝盈仓", "bonus": { "currency": "gold", "amount": 1 }, "mult": 1, "unlock": null },
+    { "id": "love",    "name": "月老", "emoji": "💞", "image": "", "blessing": "庇佑灵珠生长", "bonus": { "currency": "pearl", "amount": 1 }, "mult": 1, "unlock": null },
+    { "id": "scholar", "name": "文昌", "emoji": "📖", "image": "", "blessing": "庇佑魔丸精进", "bonus": { "currency": "magic", "amount": 1 }, "mult": 1, "unlock": null },
+    { "id": "healer",  "name": "药王", "emoji": "🌿", "image": "", "blessing": "庇佑心境安宁", "bonus": { "mood": 2 }, "mult": 1, "unlock": null },
+    { "id": "mystic",    "name": "玄女", "emoji": "🪷", "image": "", "blessing": "神恩加持 ×1.2", "mult": 1.2, "unlock": { "desc": "累计上香 10 次", "incenseCount": 10 } },
+    { "id": "starlord", "name": "星君", "emoji": "⭐", "image": "", "blessing": "神恩加持 ×1.2", "mult": 1.2, "unlock": { "desc": "情绪瓶满溢 1 次", "overflowCount": 1 } },
+    { "id": "dragon",   "name": "烛龙", "emoji": "🐲", "image": "", "blessing": "神恩加持 ×1.4", "mult": 1.4, "unlock": { "desc": "累计上香 30 次", "incenseCount": 30 } },
+    { "id": "queen",    "name": "王母", "emoji": "👑", "image": "", "blessing": "神恩加持 ×1.4", "mult": 1.4, "unlock": { "desc": "天玑≥3 且 满溢≥2", "jade": 3, "overflowCount": 2 } }
+  ],
+  "fortunes": [
+    { "rank": "上上签", "text": "紫气东来，万事顺遂", "emoji": "🪙" },
+    { "rank": "上签",   "text": "心之所向，皆有回响", "emoji": "🎋" },
+    { "rank": "中签",   "text": "静水流深，徐徐图之", "emoji": "🍃" },
+    { "rank": "中签",   "text": "不急不躁，自有安排", "emoji": "🌾" },
+    { "rank": "下签",   "text": "今日宜静养，莫强求", "emoji": "🍂" }
+  ],
+  "almanac": {
+    "yi": ["宜聆听天籁", "宜浇灌灵植", "宜陪伴仙宠", "宜投入情绪球", "宜整理心愿", "宜早些休息"],
+    "ji": ["忌久坐不动", "忌熬夜伤神", "忌心浮气躁", "忌暴饮暴食", "忌埋头苦干", "忌苛责自己"],
+    "yiDeity": {
+      "宜聆听天籁": "scholar",
+      "宜浇灌灵植": "love",
+      "宜陪伴仙宠": "healer",
+      "宜投入情绪球": "healer",
+      "宜整理心愿": "wealth",
+      "宜早些休息": "healer"
+    }
+  }
+}

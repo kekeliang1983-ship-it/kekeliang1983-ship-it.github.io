@@ -1,0 +1,60 @@
+{
+  "autoplay": true,
+  "interval": 5000,
+  "transition": "fade",
+  "showDots": true,
+  "videoCrossfade": true,
+  "slides": [
+    {
+      "id": "s1",
+      "bgType": "video",
+      "bgImage": "",
+      "bgEmoji": "",
+      "titleLines": [
+        {
+          "text": "静心探索",
+          "size": 24,
+          "bold": true,
+          "color": "#ffffff",
+          "shadow": true,
+          "align": "left",
+          "shadowOpacity": 0.15
+        },
+        {
+          "text": "发现内在的自己",
+          "size": 18,
+          "color": "#ffffff",
+          "align": "left",
+          "shadow": true,
+          "shadowOpacity": 0.15
+        }
+      ],
+      "subtitle": "陪你慢下来，治愈每一刻",
+      "subtitleColor": "#ffffff",
+      "buttonText": "开始探索",
+      "link": "/app/gallery",
+      "particles": {
+        "enabled": true,
+        "type": "petal",
+        "count": 40,
+        "maxCount": 80,
+        "color": "#ffffff",
+        "color2": "#ffd6e8",
+        "sizeMin": 2,
+        "sizeMax": 5,
+        "speed": 1,
+        "direction": "right",
+        "opacity": 0.8,
+        "rotate": true,
+        "followMouse": false,
+        "glow": true,
+        "glowColor": "#ffffff"
+      },
+      "bgVideo": "/content/videos/banner-video-s1.mp4?t=1788349070422",
+      "lineGap": 0,
+      "buttonScale": 0.9,
+      "buttonBg": "#beb7f0",
+      "buttonColor": "#ffffff"
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "name": "灵境 · LingJing",
+  "short_name": "灵境",
+  "description": "东方治愈 · 沉浸式休闲空间",
+  "theme_color": "#DEE5F5",
+  "background_color": "#DEE5F5",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/?utm_source=pwa",
+  "icons": [
+    { "src": "/icons/icon-192x192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-512x512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icons/icon-192x192-maskable.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/icons/icon-512x512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

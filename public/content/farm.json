@@ -1,0 +1,109 @@
+{
+  "elements": [
+    { "id": "gold", "label": "金" },
+    { "id": "wood", "label": "木" },
+    { "id": "water", "label": "水" },
+    { "id": "fire", "label": "火" },
+    { "id": "earth", "label": "土" }
+  ],
+  "qualities": [
+    { "id": "common", "label": "凡品" },
+    { "id": "uncommon", "label": "灵品" },
+    { "id": "rare", "label": "仙品" }
+  ],
+  "crops": [
+    { "id": "gold-common", "name": "金盏花", "element": "gold", "quality": "common", "emoji": "🌼", "image": "", "growSec": 1800, "base": { "gold": 20, "pearl": 5 }, "exp": 10, "jadeChance": 0, "quotes": ["金盏向阳，财气自生。", "一缕金光落掌心。"] },
+    { "id": "gold-uncommon", "name": "金辉兰", "element": "gold", "quality": "uncommon", "emoji": "🌟", "image": "", "growSec": 7200, "base": { "gold": 50, "pearl": 10, "magic": 5 }, "exp": 30, "jadeChance": 0, "quotes": ["兰生幽谷，其辉自照。", "金辉流转，似有灵息。"] },
+    { "id": "gold-rare", "name": "金曜莲", "element": "gold", "quality": "rare", "emoji": "🪙", "image": "", "growSec": 21600, "base": { "gold": 120, "pearl": 30, "magic": 15 }, "exp": 80, "jadeChance": 0.05, "quotes": ["曜莲一出，满室生辉。", "金魄凝莲，瑞气千条。"] },
+
+    { "id": "wood-common", "name": "薄荷", "element": "wood", "quality": "common", "emoji": "🌿", "image": "", "growSec": 1800, "base": { "gold": 20, "pearl": 5 }, "exp": 10, "jadeChance": 0, "quotes": ["清芬一握，暑气全消。", "薄荷醒神，山风入怀。"] },
+    { "id": "wood-uncommon", "name": "青萝", "element": "wood", "quality": "uncommon", "emoji": "🍀", "image": "", "growSec": 7200, "base": { "gold": 50, "pearl": 10, "magic": 5 }, "exp": 30, "jadeChance": 0, "quotes": ["青萝蔓蔓，岁月静长。", "藤牵绿意，心亦安然。"] },
+    { "id": "wood-rare", "name": "碧玉藤", "element": "wood", "quality": "rare", "emoji": "🌳", "image": "", "growSec": 21600, "base": { "gold": 120, "pearl": 30, "magic": 15 }, "exp": 80, "jadeChance": 0.05, "quotes": ["碧玉垂霜，灵木低语。", "藤结碧玉，似闻旧友声。"] },
+
+    { "id": "water-common", "name": "清萍", "element": "water", "quality": "common", "emoji": "🌊", "image": "", "growSec": 1800, "base": { "gold": 20, "pearl": 5 }, "exp": 10, "jadeChance": 0, "quotes": ["一萍浮水，天地皆静。", "清萍无根，随波亦安。"] },
+    { "id": "water-uncommon", "name": "涵珠藻", "element": "water", "quality": "uncommon", "emoji": "💧", "image": "", "growSec": 7200, "base": { "gold": 50, "pearl": 10, "magic": 5 }, "exp": 30, "jadeChance": 0, "quotes": ["藻含明珠，水韵悠长。", "露凝成珠，落手生凉。"] },
+    { "id": "water-rare", "name": "沧海珠", "element": "water", "quality": "rare", "emoji": "🫧", "image": "", "growSec": 21600, "base": { "gold": 120, "pearl": 30, "magic": 15 }, "exp": 80, "jadeChance": 0.05, "quotes": ["沧海遗珠，终有归处。", "珠光入梦，潮声渐远。"] },
+
+    { "id": "fire-common", "name": "烈焰花", "element": "fire", "quality": "common", "emoji": "🔥", "image": "", "growSec": 1800, "base": { "gold": 20, "pearl": 5 }, "exp": 10, "jadeChance": 0, "quotes": ["焰心虽烈，暖意可期。", "花开如火，照夜成灯。"] },
+    { "id": "fire-uncommon", "name": "赤焰兰", "element": "fire", "quality": "uncommon", "emoji": "🌶️", "image": "", "growSec": 7200, "base": { "gold": 50, "pearl": 10, "magic": 5 }, "exp": 30, "jadeChance": 0, "quotes": ["赤兰浴火，愈烈愈香。", "一簇丹焰，驱散寒意。"] },
+    { "id": "fire-rare", "name": "流焰莲", "element": "fire", "quality": "rare", "emoji": "🌋", "image": "", "growSec": 21600, "base": { "gold": 120, "pearl": 30, "magic": 15 }, "exp": 80, "jadeChance": 0.05, "quotes": ["莲生流焰，清净不焚。", "火中育莲，刚柔并济。"] },
+
+    { "id": "earth-common", "name": "厚土草", "element": "earth", "quality": "common", "emoji": "🪨", "image": "", "growSec": 1800, "base": { "gold": 20, "pearl": 5 }, "exp": 10, "jadeChance": 0, "quotes": ["厚土无言，载物无声。", "一抔春泥，养尽芳华。"] },
+    { "id": "earth-uncommon", "name": "沃野参", "element": "earth", "quality": "uncommon", "emoji": "🌾", "image": "", "growSec": 7200, "base": { "gold": 50, "pearl": 10, "magic": 5 }, "exp": 30, "jadeChance": 0, "quotes": ["沃野藏参，根扎岁月。", "土润根深，静待东风。"] },
+    { "id": "earth-rare", "name": "坤元芝", "element": "earth", "quality": "rare", "emoji": "⛰️", "image": "", "growSec": 21600, "base": { "gold": 120, "pearl": 30, "magic": 15 }, "exp": 80, "jadeChance": 0.05, "quotes": ["坤元毓秀，芝草长生。", "地脉凝芝，福泽绵长。"] }
+  ],
+  "fiveEngender": { "wood": "fire", "fire": "earth", "earth": "gold", "gold": "water", "water": "wood" },
+  "fiveRestrain": { "wood": "earth", "earth": "water", "water": "fire", "fire": "gold", "gold": "wood" },
+  "elementBonus": {
+    "gold": { "gold": 0.2 },
+    "wood": { "pearl": 0.2 },
+    "water": { "magic": 0.2 },
+    "fire": {},
+    "earth": { "qty": 0.2 }
+  },
+  "fengshuiMainBonus": 0.12,
+  "fengshuiEngenderBonus": 0.06,
+  "codexElementBonus": 0.05,
+  "fertility": {
+    "max": 100,
+    "start": 60,
+    "rotateGain": 5,
+    "repeatPenalty": 8,
+    "yieldCoef": 0.3,
+    "repeatYieldPenalty": 0.85
+  },
+  "prosperity": {
+    "max": 100,
+    "perHarvest": 1,
+    "rareBonus": 1,
+    "yieldCoef": 0.2,
+    "tiers": [25, 50, 75, 100]
+  },
+  "combo": {
+    "windowMs": 600000,
+    "perStep": 0.02,
+    "cap": 0.2
+  },
+  "moodThreshold": 80,
+  "moodBonus": 0.15,
+  "levelPerBonus": 0.02,
+  "weathers": [
+    { "key": "rain", "icon": "🌧️", "name": "灵雨", "desc": "收获 +10%", "bonus": 0.1, "jadeExtra": 0 },
+    { "key": "moon", "icon": "🌕", "name": "月华", "desc": "收获 +8% · 仙品天玑 +5%", "bonus": 0.08, "jadeExtra": 0.05 },
+    { "key": "harvest", "icon": "🌾", "name": "丰收日", "desc": "收获 +15%", "bonus": 0.15, "jadeExtra": 0 }
+  ],
+  "variants": [
+    { "key": "gold", "label": "黄金", "rate": 0.04 },
+    { "key": "ice", "label": "晶莹", "rate": 0.03 },
+    { "key": "twin", "label": "双生", "rate": 0.03 }
+  ],
+  "luckyRate": 0.05,
+  "luckyEvents": [
+    { "emoji": "🎐", "text": "天降福缘！+30 元宝 +5 灵珠", "gold": 30, "pearl": 5, "magic": 0 },
+    { "emoji": "🦌", "text": "灵鹿路过，衔来灵珠 +8", "gold": 0, "pearl": 8, "magic": 0 },
+    { "emoji": "🧧", "text": "土地公打赏，元宝 +12", "gold": 12, "pearl": 0, "magic": 0 },
+    { "emoji": "🕊️", "text": "仙鹤赠魔丸 +3", "gold": 0, "pearl": 0, "magic": 3 },
+    { "emoji": "🌱", "text": "萌芽馈赠，+15 元宝 +3 灵珠", "gold": 15, "pearl": 3, "magic": 0 }
+  ],
+  "bellFragChance": { "common": 0.15, "uncommon": 0.35, "rare": 1 },
+  "paidWaterDailyLimit": 3,
+  "shop": {
+    "seed": {
+      "common": { "gold": 10 },
+      "uncommon": { "pearl": 15 },
+      "rare": { "magic": 15 }
+    },
+    "petFood": {
+      "dry": { "gold": 5 },
+      "premium": { "pearl": 5 }
+    },
+    "petUnlock": { "jade": 2 },
+    "water": { "pearl": 10 }
+  },
+  "currencyLabel": {
+    "gold": "元宝",
+    "pearl": "灵珠",
+    "magic": "魔丸",
+    "jade": "天玑"
+  }
+}

@@ -1,0 +1,360 @@
+{
+  "avatars": [
+    {
+      "emoji": "🌿",
+      "element": "wood",
+      "label": "灵草"
+    },
+    {
+      "emoji": "🌱",
+      "element": "wood",
+      "label": "新芽"
+    },
+    {
+      "emoji": "🌳",
+      "element": "wood",
+      "label": "大树"
+    },
+    {
+      "emoji": "🍃",
+      "element": "wood",
+      "label": "落叶"
+    },
+    {
+      "emoji": "🌲",
+      "element": "wood",
+      "label": "松柏"
+    },
+    {
+      "emoji": "🌸",
+      "element": "wood",
+      "label": "樱花"
+    },
+    {
+      "emoji": "🌼",
+      "element": "wood",
+      "label": "雏菊"
+    },
+    {
+      "emoji": "🌺",
+      "element": "wood",
+      "label": "木槿"
+    },
+    {
+      "emoji": "🦋",
+      "element": "wood",
+      "label": "蝴蝶"
+    },
+    {
+      "emoji": "💧",
+      "element": "water",
+      "label": "露珠"
+    },
+    {
+      "emoji": "🌊",
+      "element": "water",
+      "label": "海浪"
+    },
+    {
+      "emoji": "🫧",
+      "element": "water",
+      "label": "气泡"
+    },
+    {
+      "emoji": "🐟",
+      "element": "water",
+      "label": "游鱼"
+    },
+    {
+      "emoji": "🐬",
+      "element": "water",
+      "label": "海豚"
+    },
+    {
+      "emoji": "🌙",
+      "element": "water",
+      "label": "明月"
+    },
+    {
+      "emoji": "🕊️",
+      "element": "water",
+      "label": "白鸽"
+    },
+    {
+      "emoji": "🌧️",
+      "element": "water",
+      "label": "细雨"
+    },
+    {
+      "emoji": "☁️",
+      "element": "water",
+      "label": "云朵"
+    },
+    {
+      "emoji": "☀️",
+      "element": "fire",
+      "label": "暖阳"
+    },
+    {
+      "emoji": "🔥",
+      "element": "fire",
+      "label": "星火"
+    },
+    {
+      "emoji": "🌻",
+      "element": "fire",
+      "label": "向日葵"
+    },
+    {
+      "emoji": "🦊",
+      "element": "fire",
+      "label": "灵狐"
+    },
+    {
+      "emoji": "🌟",
+      "element": "fire",
+      "label": "晨星"
+    },
+    {
+      "emoji": "✨",
+      "element": "fire",
+      "label": "流光"
+    },
+    {
+      "emoji": "⚡",
+      "element": "fire",
+      "label": "惊雷"
+    },
+    {
+      "emoji": "🏮",
+      "element": "fire",
+      "label": "灯笼"
+    },
+    {
+      "emoji": "🍂",
+      "element": "fire",
+      "label": "红叶"
+    },
+    {
+      "emoji": "🪨",
+      "element": "earth",
+      "label": "顽石"
+    },
+    {
+      "emoji": "⛰️",
+      "element": "earth",
+      "label": "远山"
+    },
+    {
+      "emoji": "🍄",
+      "element": "earth",
+      "label": "菌菇"
+    },
+    {
+      "emoji": "🐻",
+      "element": "earth",
+      "label": "小熊"
+    },
+    {
+      "emoji": "🌾",
+      "element": "earth",
+      "label": "麦穗"
+    },
+    {
+      "emoji": "🐰",
+      "element": "earth",
+      "label": "玉兔"
+    },
+    {
+      "emoji": "🌰",
+      "element": "earth",
+      "label": "橡果"
+    },
+    {
+      "emoji": "🍯",
+      "element": "earth",
+      "label": "蜜罐"
+    },
+    {
+      "emoji": "🐾",
+      "element": "earth",
+      "label": "爪印"
+    },
+    {
+      "emoji": "🪙",
+      "element": "gold",
+      "label": "金锭"
+    },
+    {
+      "emoji": "💫",
+      "element": "gold",
+      "label": "流星"
+    },
+    {
+      "emoji": "🔔",
+      "element": "gold",
+      "label": "风铃"
+    },
+    {
+      "emoji": "🪷",
+      "element": "gold",
+      "label": "金莲"
+    },
+    {
+      "emoji": "🐉",
+      "element": "gold",
+      "label": "祥龙"
+    },
+    {
+      "emoji": "🦄",
+      "element": "gold",
+      "label": "麒麟"
+    },
+    {
+      "emoji": "🪞",
+      "element": "gold",
+      "label": "宝镜"
+    },
+    {
+      "emoji": "🌷",
+      "element": "gold",
+      "label": "郁金"
+    }
+  ],
+  "names": [
+    "清霜",
+    "凌霄",
+    "星澜",
+    "云栖",
+    "墨白",
+    "寒江",
+    "苏璃",
+    "玄夜",
+    "芷若",
+    "御风",
+    "青鸾",
+    "沧月",
+    "北辰",
+    "落雪",
+    "听雨",
+    "悠言",
+    "沉璧",
+    "霁光",
+    "辞笙",
+    "扶摇",
+    "南烛",
+    "暮山",
+    "栖梧",
+    "问心",
+    "临渊",
+    "沐宸",
+    "苍梧",
+    "知微",
+    "照夜",
+    "归鹤",
+    "守一",
+    "无为",
+    "抱朴",
+    "虚舟",
+    "观弈",
+    "听涛",
+    "止水",
+    "归真",
+    "清风",
+    "半山",
+    "明月",
+    "空心",
+    "一念",
+    "忘机",
+    "松涛",
+    "云崖",
+    "慎独",
+    "澄心",
+    "知常",
+    "守拙",
+    "静观",
+    "逍遥",
+    "太素",
+    "拙朴",
+    "暖茶",
+    "软糖",
+    "橘子汽水",
+    "晚安",
+    "微光",
+    "小满",
+    "月见",
+    "晴窗",
+    "棉花糖",
+    "晚风",
+    "暖阳",
+    "星河",
+    "安歌",
+    "云朵",
+    "甜豆",
+    "晚星",
+    "黎明",
+    "拾光",
+    "朝雾",
+    "慢半拍",
+    "温言",
+    "许愿星",
+    "夏夜",
+    "小确幸",
+    "听海",
+    "治愈系",
+    "暖粥",
+    "抱抱",
+    "星屑",
+    "晚樱",
+    "团子",
+    "喵呜",
+    "啾啾",
+    "奶盖",
+    "布丁",
+    "小喵",
+    "熊仔",
+    "芋圆",
+    "糯米",
+    "兔叽",
+    "胖啾",
+    "葡萄",
+    "泡芙",
+    "栗子",
+    "奶昔",
+    "小鹿",
+    "酥酥",
+    "年糕",
+    "棉花",
+    "胖丁",
+    "喵酱",
+    "豆豆",
+    "软软",
+    "糖糖"
+  ],
+  "elementRing": {
+    "gold": {
+      "from": "#F7EDD0",
+      "to": "#E6C677"
+    },
+    "wood": {
+      "from": "#DCEFD6",
+      "to": "#8CCB8A"
+    },
+    "water": {
+      "from": "#D6EAF4",
+      "to": "#7FB8E0"
+    },
+    "fire": {
+      "from": "#FBE0D4",
+      "to": "#E8916A"
+    },
+    "earth": {
+      "from": "#F0E6D2",
+      "to": "#C9A66B"
+    }
+  },
+  "defaultRing": {
+    "from": "#8A80D8",
+    "to": "#A39AE8"
+  }
+}

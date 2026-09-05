@@ -1,0 +1,49 @@
+{
+  "name": "lingjing",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --mode development",
+    "build": "vue-tsc --noEmit && vite build --mode production",
+    "build:staging": "vue-tsc --noEmit && vite build --mode staging",
+    "build:offline": "vue-tsc --noEmit && vite build --mode offline",
+    "build:singlefile": "vue-tsc --noEmit && vite build --mode singlefile && node scripts/inline-dist.mjs",
+    "preview": "vite preview --mode production",
+    "preview:offline": "vite preview --mode offline",
+    "typecheck": "vue-tsc --noEmit",
+    "postbuild": "node scripts/post-build.js"
+  },
+  "browserslist": [
+    "> 0.5%",
+    "last 2 versions",
+    "not dead",
+    "not IE 11",
+    "chrome >= 70",
+    "safari >= 12",
+    "iOS >= 12",
+    "android >= 7"
+  ],
+  "dependencies": {
+    "vue": "^3.4.0",
+    "vue-router": "^4.3.0",
+    "pinia": "^2.1.7",
+    "pinia-plugin-persistedstate": "^3.2.1",
+    "clsx": "^2.1.1",
+    "dayjs": "^1.11.11",
+    "nanoid": "^5.0.7",
+    "gsap": "^3.12.5",
+    "axios": "^1.7.0"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0",
+    "@vitejs/plugin-vue": "^5.0.4",
+    "@vitejs/plugin-legacy": "^5.3.2",
+    "vite-plugin-pwa": "^0.19.8",
+    "vite-plugin-compression": "^0.5.1",
+    "typescript": "^5.4.5",
+    "vue-tsc": "^2.0.16",
+    "@types/node": "^20.12.0",
+    "autoprefixer": "^10.4.19",
+    "terser": "^5.31.0"
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "params": {
+    "maxLevel": 5,
+    "upgradeFrag": 3,
+    "fragPerDrop": 1
+  },
+  "artifacts": [
+    {
+      "id": "bell",
+      "name": "招财铃",
+      "emoji": "🔔",
+      "image": "",
+      "blurb": "系于灵田的风铃，收获时引动一缕财气",
+      "unlockText": "灵植收获满 10 次解锁",
+      "unlockKey": "harvest",
+      "unlockThreshold": 10,
+      "effect": { "metric": "gold", "label": "灵田元宝产出", "mode": "percent", "perLevel": 0.10, "wired": true },
+      "fragSource": "灵植收获时掉落（凡品 15% / 灵品 35% / 仙品必得）",
+      "onlineOnly": false
+    },
+    {
+      "id": "bowl",
+      "name": "聚灵碗",
+      "emoji": "🥣",
+      "image": "",
+      "blurb": "静置案头的玉碗，缓缓聚拢天地灵气",
+      "unlockText": "累计在线满 10 小时解锁",
+      "unlockKey": "onlineSec",
+      "unlockThreshold": 36000,
+      "effect": { "metric": "qiSpeed", "label": "灵气恢复速度", "mode": "percent", "perLevel": 0.20, "wired": true },
+      "fragSource": "累计在线每满 1 小时得 1 枚",
+      "onlineOnly": false
+    },
+    {
+      "id": "amulet",
+      "name": "结界符",
+      "emoji": "🪬",
+      "image": "",
+      "blurb": "温柔结界护住小院，访客借走也留得住",
+      "unlockText": "联机后开放 · 守护灵田 10 次",
+      "unlockKey": "defend",
+      "unlockThreshold": 10,
+      "effect": { "metric": "defend", "label": "守护灵田·借走比例", "mode": "percent", "perLevel": 0.20, "negative": true },
+      "fragSource": "联机后开放",
+      "onlineOnly": true
+    },
+    {
+      "id": "flute",
+      "name": "空灵笛",
+      "emoji": "🎋",
+      "image": "",
+      "blurb": "吹奏时魔气随音律流转，听歌收益倍增",
+      "unlockText": "天籁听歌累计满 1 小时解锁",
+      "unlockKey": "musicListen",
+      "unlockThreshold": 3600,
+      "effect": { "metric": "magicPellet", "label": "天籁魔丸产出", "mode": "mult", "perLevel": 1, "base": 1, "wired": true },
+      "fragSource": "天籁聆听每满 1 小时得 1 枚（里程碑另有加成）",
+      "onlineOnly": false
+    },
+    {
+      "id": "wheel",
+      "name": "轮回珠",
+      "emoji": "☸️",
+      "image": "",
+      "blurb": "掌中流转的宝珠，满溢时必有回响",
+      "unlockText": "情绪瓶满溢 1 次解锁",
+      "unlockKey": "overflow",
+      "unlockThreshold": 1,
+      "effect": { "metric": "bottlePearl", "label": "情绪瓶满溢额外灵珠", "mode": "flat", "perLevel": 1, "wired": true },
+      "fragSource": "情绪瓶每次满溢得 1 枚",
+      "onlineOnly": false
+    }
+  ]
+}

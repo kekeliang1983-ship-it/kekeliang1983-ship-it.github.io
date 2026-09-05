@@ -1,0 +1,175 @@
+{
+  "tracks": [
+    {
+      "id": "track_001",
+      "name": "孤城之心",
+      "durationSeconds": 169,
+      "isUnlocked": true,
+      "src": "/audio/track_001.mp3",
+      "desc": "大漠孤城，心有归处",
+      "tags": [
+        "放松",
+        "独处"
+      ],
+      "category": "古风",
+      "element": "gold",
+      "quality": "legendary",
+      "loop": true,
+      "fadeIn": 2,
+      "fadeOut": 3,
+      "volume": 0.9,
+      "countMilestone": true,
+      "featured": true,
+      "order": 1
+    },
+    {
+      "id": "track_002",
+      "name": "心境如水",
+      "durationSeconds": 174,
+      "isUnlocked": true,
+      "src": "/audio/track_002.mp3",
+      "desc": "止水明镜，照见本心",
+      "tags": [
+        "冥想",
+        "睡前"
+      ],
+      "category": "自然",
+      "element": "water",
+      "quality": "legendary",
+      "loop": true,
+      "fadeIn": 2,
+      "fadeOut": 3,
+      "volume": 0.85,
+      "countMilestone": true,
+      "featured": true,
+      "order": 2
+    },
+    {
+      "id": "track_003",
+      "name": "暮色归鸟",
+      "durationSeconds": 159,
+      "isUnlocked": true,
+      "src": "/audio/track_003.mp3",
+      "desc": "日暮苍山，倦鸟知还",
+      "tags": [
+        "放松"
+      ],
+      "category": "自然白噪",
+      "element": "wood",
+      "quality": "uncommon",
+      "loop": true,
+      "fadeIn": 1,
+      "fadeOut": 2,
+      "volume": 0.8,
+      "countMilestone": true,
+      "order": 3
+    },
+    {
+      "id": "track_004",
+      "name": "烟雨小镇",
+      "durationSeconds": 180,
+      "isUnlocked": false,
+      "unlockCost": {
+        "pearl": 20
+      },
+      "src": "/audio/track_004.mp3",
+      "desc": "青石巷深，烟雨朦胧",
+      "tags": [
+        "雨天",
+        "漫步"
+      ],
+      "category": "古风",
+      "element": "water",
+      "quality": "uncommon",
+      "loop": true,
+      "fadeIn": 2,
+      "fadeOut": 3,
+      "volume": 0.85,
+      "countMilestone": true,
+      "order": 4
+    },
+    {
+      "id": "track_005",
+      "name": "空山灵韵",
+      "durationSeconds": 156,
+      "isUnlocked": false,
+      "unlockCost": {
+        "magic": 15
+      },
+      "src": "/audio/track_005.mp3",
+      "desc": "空山新雨，灵韵自生",
+      "tags": [
+        "冥想"
+      ],
+      "category": "自然",
+      "element": "wood",
+      "quality": "legendary",
+      "loop": true,
+      "fadeIn": 2,
+      "fadeOut": 3,
+      "volume": 0.9,
+      "countMilestone": true,
+      "order": 5
+    },
+    {
+      "id": "track_006",
+      "name": "烟火长安",
+      "durationSeconds": 174,
+      "isUnlocked": false,
+      "milestoneHours": 4,
+      "src": "/audio/track_006.mp3",
+      "desc": "盛世烟火，长明不灭（聆听满4小时典藏解锁）",
+      "tags": [
+        "节庆",
+        "豪迈"
+      ],
+      "category": "节庆",
+      "element": "fire",
+      "quality": "legendary",
+      "loop": false,
+      "fadeIn": 1,
+      "fadeOut": 4,
+      "volume": 1,
+      "countMilestone": true,
+      "featured": true,
+      "order": 6
+    }
+  ],
+  "collections": [
+    {
+      "id": "calm",
+      "label": "禅意",
+      "icon": "🧘",
+      "order": 1,
+      "enabled": true,
+      "ids": [
+        "track_001",
+        "track_002",
+        "track_003",
+        "track_006"
+      ]
+    },
+    {
+      "id": "sleep",
+      "label": "睡前",
+      "icon": "🌙",
+      "order": 2,
+      "enabled": true,
+      "ids": [
+        "track_002",
+        "track_003"
+      ]
+    },
+    {
+      "id": "rain",
+      "label": "雨天",
+      "icon": "🌧️",
+      "order": 3,
+      "enabled": true,
+      "ids": [
+        "track_004",
+        "track_002"
+      ]
+    }
+  ]
+}
