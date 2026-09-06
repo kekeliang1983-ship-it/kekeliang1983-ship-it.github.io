@@ -128,6 +128,51 @@ grant execute on function public.best_race_opponents(text, text, integer) to ano
 
 ---
 
+## 1.5 数据合法性加固（CHECK 约束 · 零成本防异常/作弊数据入库）
+
+> 目的：在数据库层把明显离谱的写入直接拒掉（如竞速成绩 time_ms=1、漂流瓶塞几 MB 文本、拜访借走 999%）。
+> 用 `not valid` 方式加约束：**不校验历史数据**（零风险），但**对之后所有新写入立即生效**。
+> 在 Supabase **SQL Editor** 跑一次即可（可重复执行，`if not exists` 已处理）。
+
+```sql
+-- B2 漂流瓶：文案长度合理 + 情绪非空
+alter table public.drift_bottles
+  add constraint if not exists ck_drift_text_len
+  check (char_length(text) between 1 and 280) not valid;
+alter table public.drift_bottles
+  add constraint if not exists ck_drift_emotion
+  check (char_length(emotion) between 1 and 40) not valid;
+
+-- B3 邻圃快照：等级/结界符等级落在合理区间
+alter table public.farm_snapshots
+  add constraint if not exists ck_snap_level
+  check (level between 1 and 200) not valid;
+alter table public.farm_snapshots
+  add constraint if not exists ck_snap_amulet
+  check (amulet_level between 0 and 50) not valid;
+
+-- B3 拜访：借走比例 0~100%
+alter table public.farm_visits
+  add constraint if not exists ck_visit_pct
+  check (borrowed_pct between 0 and 100) not valid;
+
+-- B4 竞速成绩：用时落在人类可跑区间 + 赛道/天气/元素非空
+alter table public.race_scores
+  add constraint if not exists ck_race_time
+  check (time_ms between 300 and 600000) not valid;
+alter table public.race_scores
+  add constraint if not exists ck_race_keys
+  check (char_length(track_id) between 1 and 40
+     and char_length(weather_id) between 1 and 40
+     and char_length(pet_element) between 1 and 20) not valid;
+```
+
+> 注：若想**连历史脏数据一并校验**，跑完上面后追加：
+> `alter table public.race_scores validate constraint ck_race_time;` 等（`validate` 遇越界行会报错，需先清掉再 validate）。
+> 一般不必——新写入已受约束，历史数据不影响线上运行。
+
+---
+
 ## 2. 各表 / 函数对照（代码调用关系）
 
 | 表 / 函数 | 业务 | 前端调用 |

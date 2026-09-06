@@ -102,6 +102,69 @@ try {
     errors.push('bottle.json: drift.emotionSet 必须是非空数组');
 } catch {}
 
+// —— 数值范围断言（防后台误改出离谱值；区间保守，不误伤合法数据）——
+function inRange(file, where, val, lo, hi, intOk = false) {
+  if (typeof val !== 'number' || !Number.isFinite(val)) {
+    errors.push(`${file}: ${where} 必须是有限数字（当前 ${val}）`);
+    return;
+  }
+  if (intOk && !Number.isInteger(val)) errors.push(`${file}: ${where} 必须是整数（当前 ${val}）`);
+  if (val < lo || val > hi) errors.push(`${file}: ${where}=${val} 超出合理区间 [${lo}, ${hi}]`);
+}
+
+try {
+  const race = get('race.json');
+  inRange('race.json', 'baseSpeed', race.baseSpeed, 0.0001, 10);
+  inRange('race.json', 'maxMs', race.maxMs, 1000, 600000, true);
+  inRange('race.json', 'cooldownMs', race.cooldownMs ?? 0, 0, 60000, true);
+  inRange('race.json', 'dailyFree', race.dailyFree ?? 0, 0, 999, true);
+  inRange('race.json', 'paidCost', race.paidCost ?? 0, 0, 9999, true);
+  inRange('race.json', 'comboStep', race.comboStep ?? 0, 0, 1);
+  inRange('race.json', 'comboMax', race.comboMax ?? 0, 1, 50, true);
+  inRange('race.json', 'teamBuffMult', race.teamBuffMult ?? 0, 0.1, 3);
+  for (const arr of [race.events, race.targeted]) {
+    if (!Array.isArray(arr)) continue;
+    arr.forEach((e, i) => {
+      inRange(`race.json`, `${arr === race.events ? 'events' : 'targeted'}[${i}].mult`, e.mult, 0.1, 5);
+      inRange(`race.json`, `${arr === race.events ? 'events' : 'targeted'}[${i}].durMs`, e.durMs, 100, 10000, true);
+      inRange(`race.json`, `${arr === race.events ? 'events' : 'targeted'}[${i}].weight`, e.weight, 1, 100, true);
+    });
+  }
+  (race.tracks || []).forEach((t, i) => {
+    inRange('race.json', `tracks[${i}].speedMult`, t.speedMult, 0.1, 5);
+    inRange('race.json', `tracks[${i}].eventRateMult`, t.eventRateMult, 0.1, 5);
+  });
+  (race.weather || []).forEach((w, i) => {
+    inRange('race.json', `weather[${i}].speedMult`, w.speedMult, 0.1, 5);
+    inRange('race.json', `weather[${i}].eventRateMult`, w.eventRateMult, 0.1, 5);
+  });
+} catch {}
+
+try {
+  const arts = get('artifacts.json');
+  (arts.artifacts || []).forEach((a) => {
+    if (typeof a.multiplier === 'number')
+      inRange('artifacts.json', `法器 ${a.id}.multiplier`, a.multiplier, 0.01, 100);
+  });
+} catch {}
+
+try {
+  const checkin = get('checkin.json');
+  (checkin.days || []).forEach((d, i) => {
+    for (const cur of ['gold', 'pearl', 'jade']) {
+      if (d[cur] != null) inRange('checkin.json', `days[${i}].${cur}`, d[cur], 0, 99999, true);
+    }
+  });
+} catch {}
+
+try {
+  const pet = get('pet.json');
+  if (pet.params) {
+    inRange('pet.json', 'params.travelMs', pet.params.travelMs ?? 0, 1000, 600000, true);
+    inRange('pet.json', 'params.travelCost', pet.params.travelCost ?? 0, 0, 99999, true);
+  }
+} catch {}
+
 // —— 输出 ——
 if (errors.length) {
   console.error('❌ content 校验未通过：');
