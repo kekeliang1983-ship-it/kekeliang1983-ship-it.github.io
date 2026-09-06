@@ -6,6 +6,20 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, resolve } from 'node:path';
 
+// —— 代理感知：Node fetch 默认不读 HTTPS_PROXY；Node≥22 支持 NODE_USE_ENV_PROXY，检测到代理就带参重启自身 ——
+const PROXY = process.env.HTTPS_PROXY || process.env.https_proxy || process.env.HTTP_PROXY || process.env.http_proxy || '';
+if (PROXY && process.env.NODE_USE_ENV_PROXY !== '1') {
+  console.log('🧭 检测到系统代理', PROXY, '— 以 NODE_USE_ENV_PROXY=1 重启自身走代理…');
+  const { spawnSync } = await import('node:child_process');
+  const r = spawnSync(process.execPath, process.argv.slice(1), {
+    stdio: 'inherit',
+    env: { ...process.env, NODE_USE_ENV_PROXY: '1' },
+  });
+  process.exit(r.status ?? 0);
+}
+if (PROXY) console.log('🧭 使用系统代理:', PROXY);
+else console.log('🧭 未检测到代理环境变量，直连（TUN 模式下无需代理）');
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, '..');
 
