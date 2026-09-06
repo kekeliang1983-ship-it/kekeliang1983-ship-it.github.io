@@ -8,6 +8,9 @@
     <div class="ed-head">
       <div class="ed-title">📢 系统公告</div>
       <div class="ed-sub">新增 / 编辑 / 删除 / 置顶 · 保存后首页铃铛角标与公告弹窗实时生效（玩家点开即标记已读）</div>
+      <div class="ed-actions">
+        <button class="ed-reset" @click="resetToDefault" title="用内置基线公告覆盖当前列表（不可恢复，请确认）">↺ 恢复安全默认</button>
+      </div>
     </div>
 
     <div class="ed-body">
@@ -93,6 +96,36 @@ function remove(i: number) {
   list.value.splice(i, 1);
 }
 
+// 内置安全基线：误删/改坏公告后一键恢复（覆盖当前列表，不可撤销）
+const DEFAULT_NOTICES = [
+  {
+    id: 'welcome-2026',
+    title: '欢迎来到灵境 · 系统公告',
+    body: '这里是系统公告中心。运营公告会通过首页铃铛通知你，点开即标记为已读；已读的公告不会再亮红点。',
+    pinned: true,
+    createdAt: '2026-09-06T00:00:00.000Z',
+  },
+  {
+    id: 'newcomer-guide',
+    title: '新手必读 · 如何开始养你的小生物',
+    body: '第一次来到灵境？三步就能上手：① 在「仙宠」轻抚你的小生物，好感度会慢慢涨；② 每天来「灵植」逛逛，浇水、收集露水会有惊喜；③ 点首页铃铛随时看公告与活动。',
+    pinned: true,
+    createdAt: '2026-09-06T09:00:00.000Z',
+  },
+];
+
+function resetToDefault() {
+  if (!window.confirm('确定用内置基线公告覆盖当前列表？此操作不可恢复。')) return;
+  list.value.splice(0, list.value.length);
+  for (const n of DEFAULT_NOTICES) {
+    list.value.push({
+      __key: Math.random().toString(36).slice(2),
+      ...n,
+      createdAt: n.createdAt,
+    });
+  }
+}
+
 // 勾选置顶时，确保该条有合法 id/createdAt（自愈，防止缺字段保存崩 App）
 function onPinChange(i: number) {
   const n = list.value[i];
@@ -145,6 +178,9 @@ function watchSelfHeal() {
 .c-time { font-size: 11px; color: var(--text-muted); align-self: center; }
 .ed-del { border: none; background: transparent; color: #E0913A; cursor: pointer; font-size: 14px; align-self: center; }
 .ed-add { align-self: flex-start; margin-top: 4px; padding: 6px 14px; border-radius: 8px; border: 1px dashed var(--bg-card-strong); background: transparent; color: var(--growth); cursor: pointer; }
+.ed-actions { margin-top: 8px; }
+.ed-reset { padding: 5px 12px; border-radius: 8px; border: 1px solid var(--bg-card-strong); background: transparent; color: var(--text-muted); cursor: pointer; font-size: 12px; }
+.ed-reset:hover { color: var(--text); border-color: var(--text-muted); }
 .ed-preview { display: flex; flex-direction: column; gap: 8px; padding: 12px; border-radius: 10px; background: var(--bg-card); }
 .pv-item { display: flex; flex-direction: column; gap: 2px; padding: 10px; border-radius: 10px; background: var(--bg-card-strong); }
 .pv-item.pinned { border: 1px solid var(--growth); }
