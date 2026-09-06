@@ -258,6 +258,9 @@ interface ContentState {
   /** 素材池配置（后台 pool.json → avatars/names/elementRing/defaultRing；运行态头像/昵称不在此，由 userStore 死守 localStorage） */
   remotePool: any | null;
   poolLoaded: boolean;
+  /** 系统公告（后台 notices.json → 数组；首页铃铛角标与公告弹窗消费，已读态由 userStore 死守 localStorage） */
+  remoteNotices: any | null;
+  noticesLoaded: boolean;
   banner: BannerContent | null;
   home: HomeContent | null;
 }
@@ -289,6 +292,8 @@ export const useContentStore = defineStore('content', {
     checkinLoaded: false,
     remotePool: null,
     poolLoaded: false,
+    remoteNotices: null,
+    noticesLoaded: false,
     banner: null,
     home: null,
   }),
@@ -364,10 +369,14 @@ export const useContentStore = defineStore('content', {
         return list.find((f) => f && f.id === id) || { id };
       };
     },
+    /** 系统公告（远程优先；无配置/加载失败回退内置兜底数组） */
+    notices(state): any[] {
+      return Array.isArray(state.remoteNotices) ? state.remoteNotices : [];
+    },
   },
   actions: {
     async load() {
-      await Promise.all([this.loadGallery(), this.loadBanner(), this.loadHome(), this.loadMusic(), this.loadPet(), this.loadShrine(), this.loadArtifacts(), this.loadBottle(), this.loadFarm(), this.loadRace(), this.loadCheckin(), this.loadPool()]);
+      await Promise.all([this.loadGallery(), this.loadBanner(), this.loadHome(), this.loadMusic(), this.loadPet(), this.loadShrine(), this.loadArtifacts(), this.loadBottle(), this.loadFarm(), this.loadRace(), this.loadCheckin(), this.loadPool(), this.loadNotices()]);
       this.ready = true;
     },
     async loadGallery() {
@@ -566,6 +575,20 @@ export const useContentStore = defineStore('content', {
         }
       } catch (e) {
         console.warn('[content] pool.json 加载失败，回退内置兜底', e);
+      }
+    },
+    async loadNotices() {
+      try {
+        const res = await fetch(`${BASE}/notices.json`, { cache: 'no-cache' });
+        if (!res.ok) throw new Error('notices ' + res.status);
+        const data = (await res.json()) as any;
+        // 公告是数组结构（顶层 []）；只接受合法数组，空数组也接受（表示「无公告」）
+        if (Array.isArray(data)) {
+          this.remoteNotices = data;
+          this.noticesLoaded = true;
+        }
+      } catch (e) {
+        console.warn('[content] notices.json 加载失败，回退内置兜底', e);
       }
     },
     async loadBottle() {

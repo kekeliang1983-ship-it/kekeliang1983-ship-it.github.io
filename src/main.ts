@@ -59,7 +59,7 @@ async function bootstrap() {
   if (import.meta.env.DEV) {
     (window as any).__MOCK_PLAYER__ = {
       setOffersToday: (n: number) => { modulesStore.shrineOffersToday = Math.max(0, Math.min(3, n)); },
-      setNotif: (n: number) => userStore.setNotifUnread(n),
+      markAllNoticesRead: () => userStore.markAllNoticesRead(),
       setNickname: (n: string | null) => userStore.setNickname(n),
     };
     console.log('[DEV] __MOCK_PLAYER__ 已挂载，可调整测试数据');

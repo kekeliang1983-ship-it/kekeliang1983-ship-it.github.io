@@ -16,6 +16,7 @@ export const MODULES: ModuleDef[] = [
   // —— 首页装扮 ——
   { id: 'home', label: '首页整体装扮', icon: '🏠', group: '首页装扮', editor: 'home', desc: '最下层底图 / 今日心语（背景卡 + 动态漂浮物）/ 7 大版块白卡图标与背景', wired: true },
   { id: 'banner', label: '首页 Banner 文案', icon: '🚩', group: '首页装扮', editor: 'banner', desc: '首页顶部展示栏的多行标题、按钮文案与背景图', wired: true },
+  { id: 'notices', label: '系统公告', icon: '📢', group: '首页装扮', editor: 'notice', desc: '系统公告管理：新增/编辑/删除/置顶；保存后 App 首页铃铛角标与公告弹窗实时生效', wired: true },
 
   // —— 玩法配置 ——
   { id: 'pet', label: '仙宠', icon: '🐾', group: '玩法配置', editor: 'pet', desc: '仙宠全局参数/本体换皮/旅行档位/食物价格/文案池（已接入内容层，App 实时生效）', wired: true },

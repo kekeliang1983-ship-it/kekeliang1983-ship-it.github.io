@@ -2,6 +2,7 @@
 import { defineStore } from 'pinia';
 import type { IUser } from '@/types/index';
 import { emitResourceDelta } from '@/composables/useResourceDelta';
+import { useContentStore } from '@/stores/useContentStore';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const todayKey = () => new Date().toISOString().slice(0, 10);
@@ -27,7 +28,8 @@ export const useUserStore = defineStore('user', {
     nickname: null,
     avatar: null,          // 头像：emoji 字符串或 null（null=用昵称首字）
     renameSkipped: false,  // 首进起名引导是否已跳过（持久化，跳过后不再自动弹）
-    notifUnread: 3,     // 初始通知（测试角标用）
+    /** 已读公告 id 集合（持久化；红点角标 = 公告总数 - 已读数；替代旧的写死 notifUnread） */
+    readNoticeIds: [] as string[],
     soundOn: true,      // 音效开关（持久化；初始化时应用到 audio 引擎）
     hapticOn: true,     // 震动开关（持久化；初始化时应用到 haptic 引擎）
     qiBubbleDate: '',   // 灵气泡泡当日已收日期（初始空→首次进入按当天处理）
@@ -40,6 +42,15 @@ export const useUserStore = defineStore('user', {
     displayName: (state): string => {
       const n = state.nickname;
       return (n && n.trim()) ? n.trim() : '友';
+    },
+    /**
+     * 首页铃铛未读数 = 公告中「id 不在已读集合」的条数（替代旧写死 notifUnread）。
+     * 读取内容层公告（动态 import 防初始化期循环依赖）；未加载完成时为 0，加载后响应式更新。
+     */
+    notifUnread(): number {
+      const read = new Set(this.readNoticeIds || []);
+      const notices = useContentStore().notices || [];
+      return notices.filter((n: any) => n && typeof n.id === 'string' && !read.has(n.id)).length;
     },
   },
 
@@ -123,7 +134,23 @@ export const useUserStore = defineStore('user', {
       // 超出上限按码点截断（NICKNAME_MAX=8），下限 2 字由 UI 内联提示拦截
       this.nickname = chars.slice(0, NICKNAME_MAX).join('');
     },
-    setNotifUnread(n: number) { this.notifUnread = Math.max(0, n); },
+    /**
+     * 标记单条公告已读：把 id 加进已读集合（去重）。
+     * 红点 = 公告总数 - 已读集合大小，自动随之下降。
+     */
+    markNoticeRead(id: string) {
+      if (typeof id !== 'string' || !id) return;
+      const set = new Set(this.readNoticeIds || []);
+      set.add(id);
+      this.readNoticeIds = Array.from(set);
+    },
+    /** 全部已读：把当前内容层所有公告 id 并入已读集合（红点清零） */
+    markAllNoticesRead() {
+      const notices = useContentStore().notices || [];
+      const set = new Set(this.readNoticeIds || []);
+      for (const n of notices) if (n && typeof n.id === 'string') set.add(n.id);
+      this.readNoticeIds = Array.from(set);
+    },
 
     /**
      * 设置头像：emoji 字符串、或 data:image 上传图（base64）、或 null 恢复昵称首字。
@@ -143,7 +170,7 @@ export const useUserStore = defineStore('user', {
       'gold', 'pearl', 'magic', 'jade',
       'qi', 'mood',
       'lastActiveTimestamp', 'lastDailyReset',
-      'nickname', 'notifUnread', 'renameSkipped', 'avatar',
+      'nickname', 'readNoticeIds', 'renameSkipped', 'avatar',
       'soundOn', 'hapticOn',
       'qiBubbleDate', 'qiBubbleGain',
     ],

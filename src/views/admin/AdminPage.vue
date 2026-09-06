@@ -66,6 +66,7 @@
         <CheckinEditor v-else-if="active.editor === 'checkin'" :data="model" />
         <PoolEditor v-else-if="active.editor === 'pool'" :data="model" />
         <HomeEditor v-else-if="active.editor === 'home'" :home="model" />
+        <NoticeEditor v-else-if="active.editor === 'notice'" :data="model" />
         <JsonEditor v-else :data="model" :file="active.id" @update="onJsonUpdate" />
       </section>
       <div class="loading" v-else>加载中…</div>
@@ -135,6 +136,7 @@ import FarmEditor from '@/admin/editors/FarmEditor.vue';
 import RaceEditor from '@/admin/editors/RaceEditor.vue';
 import CheckinEditor from '@/admin/editors/CheckinEditor.vue';
 import PoolEditor from '@/admin/editors/PoolEditor.vue';
+import NoticeEditor from '@/admin/editors/NoticeEditor.vue';
 import JsonEditor from '@/admin/components/JsonEditor.vue';
 import { adminFetch, setAdminToken } from '@/admin/api';
 
@@ -370,6 +372,9 @@ function applyRaw(id: string, raw: any) {
     } else if (m.editor === 'pool') {
       // pool.json 为扁平全量结构，直接交给 PoolEditor mutate
       model.value = raw.__empty ? {} : raw;
+    } else if (m.editor === 'notice') {
+      // notices.json 顶层是数组；空/缺失回退空数组（编辑器自愈补默认行）
+      model.value = Array.isArray(raw) ? raw : [];
     } else {
       model.value = raw.__empty ? {} : raw;
     }
@@ -468,6 +473,17 @@ function buildPayload(): any {
   if (m.editor === 'pool') {
     // pool.json 扁平全量结构，编辑器直接 mutate 原对象
     return model.value || {};
+  }
+  if (m.editor === 'notice') {
+    // notices.json 顶层是数组，直接回写；编辑器给每行加了内部 __key（仅 v-for 稳定用），落盘前剔除
+    const arr: any[] = Array.isArray(model.value) ? model.value : [];
+    return arr.map(({ __key, ...rest }) => ({
+      id: typeof rest.id === 'string' ? rest.id : '',
+      title: typeof rest.title === 'string' ? rest.title : '',
+      body: typeof rest.body === 'string' ? rest.body : '',
+      pinned: !!rest.pinned,
+      createdAt: typeof rest.createdAt === 'string' ? rest.createdAt : new Date().toISOString(),
+    }));
   }
   return model.value;
 }

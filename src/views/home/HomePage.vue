@@ -36,7 +36,7 @@
             <path d="M9 4h7v16l-3.5-2L9 20z"/>
           </svg>
         </CornerButton>
-        <CornerButton aria-label="通知" :badge="userStore.notifUnread">
+        <CornerButton aria-label="通知" :badge="userStore.notifUnread" @click="noticeOpen = true">
           <svg viewBox="0 0 24 24">
             <path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
             <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
@@ -250,6 +250,8 @@
     <CheckinModal :open="checkinOpen" @close="checkinOpen = false" />
     <!-- 漂流信箱 -->
     <DriftInboxModal :open="driftOpen" @close="driftOpen = false" />
+    <!-- 系统公告 -->
+    <NoticeModal :open="noticeOpen" @close="noticeOpen = false" />
   </div>
 </template>
 
@@ -263,6 +265,7 @@ import { createDebugLogger } from '@/core/debugLogger';
 import CornerButton from '@/components/common/CornerButton.vue';
 import CheckinModal from '@/components/CheckinModal.vue';
 import DriftInboxModal from '@/components/DriftInboxModal.vue';
+import NoticeModal from '@/components/NoticeModal.vue';
 import BannerParticles from '@/components/BannerParticles.vue';
 import HeroVideo from '@/components/HeroVideo.vue';
 import type { BannerSlide, BannerTextLine } from '@/stores/useContentStore';
@@ -276,6 +279,8 @@ const checkinStore = useCheckinStore();
 const checkinOpen = ref(false);
 /** 漂流信箱开关（首页消息 logo 复活为信箱入口） */
 const driftOpen = ref(false);
+/** 系统公告开关（首页通知铃铛） */
+const noticeOpen = ref(false);
 
 /* ============ 首页 Banner（轮播 + 视频 + 粒子），内容层驱动 ============ */
 const banner = computed(() => content.bannerContent);

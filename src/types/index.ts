@@ -53,7 +53,7 @@ export interface IUser {
   nickname: string | null;   // 动态昵称（决策16A）
   renameSkipped: boolean;    // 首进起名引导是否已跳过
   avatar: string | null;     // 头像（emoji 字符串；null=用昵称首字）
-  notifUnread: number;      // Header通知角标（决策3A）
+  readNoticeIds: string[];  // 已读系统公告 id 集合（驱动首页铃铛红点；替代旧写死 notifUnread）
   soundOn: boolean;         // 音效开关（持久化）
   hapticOn: boolean;        // 震动开关（持久化）
   qiBubbleDate: string;     // 灵气泡泡当日已收日期（YYYY-MM-DD，跨天清零）

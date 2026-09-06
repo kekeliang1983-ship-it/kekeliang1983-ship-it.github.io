@@ -52,6 +52,29 @@ for (const file of files) {
     errors.push(`${file}: JSON 解析失败 — ${e.message}`);
     continue;
   }
+
+  // —— notices.json 特例：顶层是数组（每条公告一行），不走「顶层必须是对象」校验 ——
+  if (file === 'notices.json') {
+    if (!Array.isArray(json)) {
+      errors.push('notices.json: 顶层必须是数组（每条公告一个对象）');
+      continue;
+    }
+    json.forEach((n, i) => {
+      if (!isPlainObject(n)) {
+        errors.push(`notices.json[${i}]: 必须是对象`);
+        return;
+      }
+      if (typeof n.id !== 'string' || !n.id) errors.push(`notices.json[${i}]: 缺少字符串字段 id`);
+      if (typeof n.title !== 'string') errors.push(`notices.json[${i}]: 缺少字符串字段 title`);
+      if (typeof n.body !== 'string') errors.push(`notices.json[${i}]: 缺少字符串字段 body`);
+      if (typeof n.pinned !== 'boolean') errors.push(`notices.json[${i}]: 缺少布尔字段 pinned`);
+      if (typeof n.createdAt !== 'string' || isNaN(new Date(n.createdAt).getTime()))
+        errors.push(`notices.json[${i}]: createdAt 必须是合法 ISO 时间字符串`);
+    });
+    walkNaN(json, file);
+    continue;
+  }
+
   if (!isPlainObject(json)) {
     errors.push(`${file}: 顶层必须是对象（当前为 ${Array.isArray(json) ? '数组' : typeof json}）`);
     continue;

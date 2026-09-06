@@ -2,7 +2,7 @@
 // 设计目标：做一个「可复用的内容管理引擎」，以后别的应用照此注册模块即可。
 
 /** 模块编辑器类型 */
-export type EditorKind = 'gallery' | 'banner' | 'music' | 'home' | 'pet' | 'shrine' | 'artifacts' | 'bottle' | 'farm' | 'race' | 'checkin' | 'pool' | 'json';
+export type EditorKind = 'gallery' | 'banner' | 'music' | 'home' | 'pet' | 'shrine' | 'artifacts' | 'bottle' | 'farm' | 'race' | 'checkin' | 'pool' | 'notice' | 'json';
 
 /** 单个可管理模块的定义（注册表项） */
 export interface ModuleDef {
