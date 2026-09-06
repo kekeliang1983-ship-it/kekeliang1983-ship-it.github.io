@@ -117,6 +117,12 @@ export default defineConfig(({ mode }: ConfigEnv) => {
     base: isSingle ? './' : '/',
     publicDir: 'public',
 
+    // 固定 dev 端口，避免 5173→5174→5175 跳变，后台地址稳定为 localhost:5173
+    server: {
+      port: 5173,
+      strictPort: true,
+    },
+
     resolve: {
       alias: {
         '@': resolve(__dirname, 'src'),
