@@ -18,3 +18,6 @@ vite.config.ts.timestamp-*.mjs
 
 # 代码分析
 stats.html
+
+# Agent 本机记忆/状态目录（非仓库内容）
+.workbuddy/
