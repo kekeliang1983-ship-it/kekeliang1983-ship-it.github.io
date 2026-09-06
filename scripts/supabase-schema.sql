@@ -12,6 +12,7 @@ create table if not exists public.drift_bottles (
   id uuid primary key default gen_random_uuid(),
   emotion text not null,
   text text not null,
+  owner_fingerprint text not null default '',
   created_at timestamptz not null default now()
 );
 alter table public.drift_bottles enable row level security;
@@ -19,9 +20,14 @@ drop policy if exists "anon_insert" on public.drift_bottles;
 create policy "anon_insert" on public.drift_bottles for insert to anon with check (true);
 drop policy if exists "anon_select" on public.drift_bottles;
 create policy "anon_select" on public.drift_bottles for select to anon using (true);
-create or replace function public.random_bottle() returns setof public.drift_bottles
-language sql stable as $$ select * from public.drift_bottles order by random() limit 1; $$;
-grant execute on function public.random_bottle() to anon;
+-- 新增 owner_fingerprint 列（老数据默认 ''，不会与本机指纹冲突，安全）
+alter table public.drift_bottles add column if not exists owner_fingerprint text not null default '';
+create or replace function public.random_bottle(p_exclude text)
+returns setof public.drift_bottles language sql stable as $$
+  select * from public.drift_bottles
+  where owner_fingerprint is distinct from p_exclude
+  order by random() limit 1; $$;
+grant execute on function public.random_bottle(text) to anon;
 
 -- ============================================================
 -- B3 访友（邻圃）：玩家防御快照 + 随机邻圃 + 拜访记录

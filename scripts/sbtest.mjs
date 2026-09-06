@@ -41,11 +41,14 @@ async function main() {
 
   // ===== B2 漂流瓶 =====
   try {
-    const ins = await supabase.from('drift_bottles').insert({ emotion: 'calm', text: 'probe-' + Date.now() });
+    // 放两只瓶：一只属 probeA（本机），一只属 other（他人）
+    await supabase.from('drift_bottles').insert({ emotion: 'calm', text: 'probe-self-' + Date.now(), owner_fingerprint: 'probeA' });
+    const ins = await supabase.from('drift_bottles').insert({ emotion: 'joy', text: 'probe-other-' + Date.now(), owner_fingerprint: 'other' });
     ok('B2 放流 insert', !ins.error, ins.error?.message);
-    const { data, error } = await supabase.rpc('random_bottle').maybeSingle();
-    ok('B2 捞瓶 random_bottle()', !error && !!data, error?.message || (data ? '取到:' + data.text : '空瓶海'));
-    if (data) await supabase.from('drift_bottles').delete().eq('id', data.id);
+    // 捞取时排除 probeA，应拿到他人瓶，验证不会捞回自己
+    const { data, error } = await supabase.rpc('random_bottle', { p_exclude: 'probeA' }).maybeSingle();
+    ok('B2 捞瓶 random_bottle(p_exclude) 排除自己', !error && !!data && data.owner_fingerprint !== 'probeA', error?.message || (data ? '取到:' + data.text : '空瓶海'));
+    await supabase.from('drift_bottles').delete().neq('owner_fingerprint', '__never__');
   } catch (e) {
     ok('B2 漂流瓶', false, String(e));
   }

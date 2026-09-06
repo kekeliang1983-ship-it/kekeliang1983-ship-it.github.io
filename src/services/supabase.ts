@@ -28,7 +28,11 @@ type DriftRowRes = { data: { emotion: string; text: string } | null; error: { me
 export async function pushDriftToCloud(emotion: string, text: string): Promise<void> {
   if (!supabase) return;
   try {
-    await withTimeout(supabase.from('drift_bottles').insert({ emotion, text }) as unknown as Promise<unknown>);
+    await withTimeout(
+      supabase
+        .from('drift_bottles')
+        .insert({ emotion, text, owner_fingerprint: getOrCreateFingerprint() }) as unknown as Promise<unknown>,
+    );
   } catch (e) {
     console.warn('[supabase] 放流失败', e);
   }
@@ -39,7 +43,9 @@ export async function fetchRandomDriftFromCloud(): Promise<{ emotion: string; te
   if (!supabase) return null;
   try {
     const res = (await withTimeout(
-      supabase.rpc('random_bottle').maybeSingle() as unknown as Promise<DriftRowRes>,
+      supabase
+        .rpc('random_bottle', { p_exclude: getOrCreateFingerprint() })
+        .maybeSingle() as unknown as Promise<DriftRowRes>,
     )) as DriftRowRes | null;
     if (!res) return null; // 超时
     if (res.error) {
