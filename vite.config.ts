@@ -17,9 +17,10 @@ const __dirname = dirname(__filename);
 // 提供 /__admin_api/* 读写 public/content/*.json、接收 base64 图片写盘、触发本地构建。
 // 简易口令门禁：设置环境变量 ADMIN_TOKEN 后，所有 /__admin_api/* 请求须带
 // 请求头 x-admin-token 匹配才放行；未设置则保持向后兼容（不拦截）。
-function adminApiPlugin() {
+function adminApiPlugin(tokenFromEnv?: string) {
   const contentDir = join(__dirname, 'public', 'content');
-  const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
+  // 优先用 loadEnv 从 .env.local 读到的（方式 B），其次回退 shell 导出的 process.env（方式 A）
+  const ADMIN_TOKEN = tokenFromEnv || process.env.ADMIN_TOKEN || '';
   const readBody = (req: any) =>
     new Promise<string>((resolve, reject) => {
       let data = '';
@@ -267,7 +268,7 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       enableCompress ? compression({ algorithm: 'brotliCompress', ext: '.br', threshold: 1024, deleteOriginalAssets: false }) : null,
 
       // 本地可视化内容后台（仅 dev：configureServer 不进生产构建）
-      adminApiPlugin(),
+      adminApiPlugin(env.ADMIN_TOKEN),
     ],
 
     optimizeDeps: {
