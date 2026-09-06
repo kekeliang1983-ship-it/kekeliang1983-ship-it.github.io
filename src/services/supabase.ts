@@ -176,12 +176,12 @@ export async function uploadRaceScore(trackId: string, weatherId: string, timeMs
 }
 
 /** 拉取「当前赛道」上其他玩家的最佳成绩（排除自己）；无网/出错/超时返回 null（本地兜底） */
-export async function fetchRaceOpponents(trackId: string, limit = 5): Promise<RaceOpponent[] | null> {
+export async function fetchRaceOpponents(trackId: string, limit = 5, element?: string): Promise<RaceOpponent[] | null> {
   if (!supabase) return null;
   const fp = getOrCreateFingerprint();
   try {
     const res = (await withTimeout(
-      supabase.rpc('best_race_opponents', { p_track: trackId, p_exclude: fp, p_limit: limit }) as unknown as Promise<{
+      supabase.rpc('best_race_opponents', { p_track: trackId, p_exclude: fp, p_limit: limit, p_element: element ?? null }) as unknown as Promise<{
         data: Array<{ fingerprint: string; time_ms: number; pet_element: string }> | null;
         error: { message: string } | null;
       }>,

@@ -49,7 +49,7 @@ create policy "anon_snap_update" on public.farm_snapshots for update to anon usi
 
 create or replace function public.random_farm_snapshots(p_limit integer, p_exclude text)
 returns setof public.farm_snapshots language sql stable as $$
-  select * from public.farm_snapshots where fingerprint <> p_exclude order by random() limit p_limit; $$;
+  select * from public.farm_snapshots where fingerprint is distinct from p_exclude order by random() limit p_limit; $$;
 grant execute on function public.random_farm_snapshots(integer, text) to anon;
 
 create table if not exists public.farm_visits (
@@ -81,12 +81,15 @@ create policy "anon_race_select" on public.race_scores for select to anon using 
 drop policy if exists "anon_race_insert" on public.race_scores;
 create policy "anon_race_insert" on public.race_scores for insert to anon with check (true);
 
-create or replace function public.best_race_opponents(p_track text, p_exclude text, p_limit integer)
+create or replace function public.best_race_opponents(p_track text, p_exclude text, p_limit integer, p_element text default null)
 returns table (fingerprint text, time_ms integer, pet_element text) language sql stable as $$
   with ranked as (
     select s.fingerprint, s.time_ms, s.pet_element,
            row_number() over (partition by s.fingerprint order by s.time_ms asc) as rn
-    from public.race_scores s where s.track_id = p_track and s.fingerprint <> p_exclude
+    from public.race_scores s
+    where s.track_id = p_track
+      and s.fingerprint is distinct from p_exclude
+      and (p_element is null or s.pet_element = p_element)
   )
   select r.fingerprint, r.time_ms, r.pet_element from ranked r where r.rn = 1
   order by r.time_ms asc limit p_limit; $$;

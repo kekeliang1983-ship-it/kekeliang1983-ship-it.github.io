@@ -68,8 +68,12 @@ async function main() {
   try {
     await supabase.from('race_scores').insert({ fingerprint: 'probeX', track_id: 'wood', weather_id: 'sunny', time_ms: 21000, pet_element: 'wood' });
     await supabase.from('race_scores').insert({ fingerprint: 'probeY', track_id: 'wood', weather_id: 'sunny', time_ms: 18000, pet_element: 'fire' });
-    const { data, error } = await supabase.rpc('best_race_opponents', { p_track: 'wood', p_exclude: 'probeX', p_limit: 5 });
+    // 排除自己；不过滤元素 → 应拿到对手最佳（probeY:18000）
+    const { data, error } = await supabase.rpc('best_race_opponents', { p_track: 'wood', p_exclude: 'probeX', p_limit: 5, p_element: null });
     ok('B4 竞速 best_race_opponents()', !error && Array.isArray(data) && data.length > 0, error?.message || (data || []).map((o) => `${o.fingerprint}:${o.time_ms}`).join(','));
+    // 同元素过滤：只取 wood 元素对手 → 不应含 fire 的 probeY
+    const { data: woodOnly, error: e2 } = await supabase.rpc('best_race_opponents', { p_track: 'wood', p_exclude: 'probeX', p_limit: 5, p_element: 'wood' });
+    ok('B4 竞速 p_element 同元素过滤', !e2 && Array.isArray(woodOnly) && woodOnly.every((o) => o.pet_element === 'wood'), e2?.message || (woodOnly || []).map((o) => `${o.fingerprint}:${o.pet_element}`).join(','));
     await supabase.from('race_scores').delete().in('fingerprint', ['probeX', 'probeY']);
   } catch (e) {
     ok('B4 竞速榜', false, String(e));

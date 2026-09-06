@@ -298,7 +298,7 @@ async function openBoard() {
   boardError.value = false;
   if (!isSupabaseEnabled) return; // 离线：sheet 内提示
   boardLoading.value = true;
-  const list = await fetchRaceOpponents(skin.value?.id ?? 'meadow', 5);
+  const list = await fetchRaceOpponents(skin.value?.id ?? 'meadow', 5, selectedEl.value);
   boardLoading.value = false;
   if (list === null) { boardError.value = true; return; }
   opponents.value = list;
