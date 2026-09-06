@@ -135,36 +135,45 @@ grant execute on function public.best_race_opponents(text, text, integer) to ano
 > 在 Supabase **SQL Editor** 跑一次即可（可重复执行，`if not exists` 已处理）。
 
 ```sql
--- B2 漂流瓶：文案长度合理 + 情绪非空
-alter table public.drift_bottles
-  add constraint if not exists ck_drift_text_len
-  check (char_length(text) between 1 and 280) not valid;
-alter table public.drift_bottles
-  add constraint if not exists ck_drift_emotion
-  check (char_length(emotion) between 1 and 40) not valid;
+-- PostgreSQL 不支持 `alter table ... add constraint if not exists`，
+-- 用 DO 匿名块先查 pg_constraint 再添加，重复执行安全。
 
--- B3 邻圃快照：等级/结界符等级落在合理区间
-alter table public.farm_snapshots
-  add constraint if not exists ck_snap_level
-  check (level between 1 and 200) not valid;
-alter table public.farm_snapshots
-  add constraint if not exists ck_snap_amulet
-  check (amulet_level between 0 and 50) not valid;
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'ck_drift_text_len' and conrelid = 'public.drift_bottles'::regclass) then
+    alter table public.drift_bottles add constraint ck_drift_text_len check (char_length(text) between 1 and 280) not valid;
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'ck_drift_emotion' and conrelid = 'public.drift_bottles'::regclass) then
+    alter table public.drift_bottles add constraint ck_drift_emotion check (char_length(emotion) between 1 and 40) not valid;
+  end if;
+end $$;
 
--- B3 拜访：借走比例 0~100%
-alter table public.farm_visits
-  add constraint if not exists ck_visit_pct
-  check (borrowed_pct between 0 and 100) not valid;
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'ck_snap_level' and conrelid = 'public.farm_snapshots'::regclass) then
+    alter table public.farm_snapshots add constraint ck_snap_level check (level between 1 and 200) not valid;
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'ck_snap_amulet' and conrelid = 'public.farm_snapshots'::regclass) then
+    alter table public.farm_snapshots add constraint ck_snap_amulet check (amulet_level between 0 and 50) not valid;
+  end if;
+end $$;
 
--- B4 竞速成绩：用时落在人类可跑区间 + 赛道/天气/元素非空
-alter table public.race_scores
-  add constraint if not exists ck_race_time
-  check (time_ms between 300 and 600000) not valid;
-alter table public.race_scores
-  add constraint if not exists ck_race_keys
-  check (char_length(track_id) between 1 and 40
-     and char_length(weather_id) between 1 and 40
-     and char_length(pet_element) between 1 and 20) not valid;
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'ck_visit_pct' and conrelid = 'public.farm_visits'::regclass) then
+    alter table public.farm_visits add constraint ck_visit_pct check (borrowed_pct between 0 and 100) not valid;
+  end if;
+end $$;
+
+do $$
+begin
+  if not exists (select 1 from pg_constraint where conname = 'ck_race_time' and conrelid = 'public.race_scores'::regclass) then
+    alter table public.race_scores add constraint ck_race_time check (time_ms between 300 and 600000) not valid;
+  end if;
+  if not exists (select 1 from pg_constraint where conname = 'ck_race_keys' and conrelid = 'public.race_scores'::regclass) then
+    alter table public.race_scores add constraint ck_race_keys check (char_length(track_id) between 1 and 40 and char_length(weather_id) between 1 and 40 and char_length(pet_element) between 1 and 20) not valid;
+  end if;
+end $$;
 ```
 
 > 注：若想**连历史脏数据一并校验**，跑完上面后追加：
