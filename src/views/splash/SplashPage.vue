@@ -2,7 +2,7 @@
 <template>
   <div class="splash-page" ref="rootRef">
     <!-- Logo 轮播容器 -->
-    <div class="splash-track" ref="trackRef">
+    <div class="splash-track" ref="trackRef" v-show="!showOnboarding">
       <!-- 第1页：工作室Logo -->
       <div class="splash-slide studio-slide">
         <div class="logo-mark">🌸</div>
@@ -20,17 +20,27 @@
       <i :class="{ active: slideIdx === 0 }"></i>
       <i :class="{ active: slideIdx >= 1 }"></i>
     </div>
+
+    <!-- 新手引导覆盖层（首访触发；完成/跳过后再进首页）-->
+    <OnboardingOverlay
+      :open="showOnboarding"
+      @finish="onOnboardingFinish"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, shallowRef } from 'vue';
 import { useRouter } from 'vue-router';
+import { useUserStore } from '@/stores/useUserStore';
+import OnboardingOverlay from '@/components/OnboardingOverlay.vue';
 
 const router = useRouter();
+const userStore = useUserStore();
 const rootRef = ref<HTMLElement | null>(null);
 const trackRef = ref<HTMLElement | null>(null);
 const slideIdx = ref(0);
+const showOnboarding = ref(false);
 
 // 定时器引用（统一管理，防泄漏：project_memory Anti-Pattern）
 const timers = shallowRef<number[]>([]);
@@ -55,10 +65,20 @@ onMounted(() => {
     }
   }, 1600));
 
+  // 轮播结束：未引导过则进引导序列，否则直接进首页
   addTimer(window.setTimeout(() => {
-    router.replace('/app/home');
+    if (!userStore.onboarded) {
+      showOnboarding.value = true;
+    } else {
+      router.replace('/app/home');
+    }
   }, 3100));
 });
+
+// 引导完成/跳过：进入首页（onboarded 已在组件内置位）
+function onOnboardingFinish() {
+  router.replace('/app/home');
+}
 
 onBeforeUnmount(() => {
   clearAllTimers();

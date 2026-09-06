@@ -104,25 +104,29 @@
         v-for="m in menus"
         :key="m.key"
         v-feedback="'BUTTON_CLICK'"
-        @click="m.route ? go(m.route) : undefined"
+        @click="m.route ? go(m.route) : (m.action ? m.action() : undefined)"
       >
         <span class="menu-ic">{{ m.icon }}</span>
         <span class="menu-name">{{ m.name }}</span>
         <span class="menu-arrow" v-if="m.route">›</span>
       </div>
     </section>
+
+    <!-- 新手帮助：重看引导（不清空进度）-->
+    <OnboardingOverlay :open="showHelp" replay @finish="showHelp = false" />
   </div>
 </template>
 
 <script setup lang="ts">
 defineOptions({ name: 'Me' });
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useModulesStore, useUserStore, useContentStore } from '@/stores/index';
 import { vFeedback, audio, haptic } from '@/core/feedback';
 import { useNameModal } from '@/composables/useNameModal';
 import { useAvatarModal } from '@/composables/useAvatarModal';
 import Avatar from '@/components/Avatar.vue';
+import OnboardingOverlay from '@/components/OnboardingOverlay.vue';
 import { EMOTIONS } from '@/constants/bottle';
 import { PET_ELEMENTS } from '@/stores/useModulesStore';
 
@@ -194,7 +198,11 @@ const menus = [
   { key: 'gallery', icon: '🖼️', name: '我的画境', route: 'gallery' },
   { key: 'artifacts', icon: '🪔', name: '法器背包', route: 'artifacts' },
   { key: 'bottle', icon: '🫙', name: '情绪博物馆', route: 'bottle' },
+  { key: 'help', icon: '🌟', name: '新手帮助', action: () => { showHelp.value = true; } },
 ];
+
+/** 新手帮助：重看引导序列（replay，不清空已有进度） */
+const showHelp = ref(false);
 </script>
 
 <style scoped>

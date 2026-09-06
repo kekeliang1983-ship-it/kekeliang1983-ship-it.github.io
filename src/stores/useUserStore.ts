@@ -28,6 +28,7 @@ export const useUserStore = defineStore('user', {
     nickname: null,
     avatar: null,          // 头像：emoji 字符串或 null（null=用昵称首字）
     renameSkipped: false,  // 首进起名引导是否已跳过（持久化，跳过后不再自动弹）
+    onboarded: false,       // 新手引导是否已完成（首访触发 Splash 引导序列，完成后不再自动弹）
     /** 已读公告 id 集合（持久化；红点角标 = 公告总数 - 已读数；替代旧的写死 notifUnread） */
     readNoticeIds: [] as string[],
     soundOn: true,      // 音效开关（持久化；初始化时应用到 audio 引擎）
@@ -159,6 +160,15 @@ export const useUserStore = defineStore('user', {
     setAvatar(emoji: string | null) {
       this.avatar = emoji === null ? null : String(emoji);
     },
+
+    /**
+     * 标记新手引导已完成：置位 onboarded（持久化）。
+     * 用于 Splash 首访引导走完/跳过、或「我的→新手帮助」重看结束时调用。
+     * 已为 true 时重复调用为幂等 no-op，不影响已有进度。
+     */
+    setOnboarded() {
+      this.onboarded = true;
+    },
   },
 
   // 持久化字段（严格按契约2.1）—— pinia-plugin-persistedstate v3
@@ -170,7 +180,7 @@ export const useUserStore = defineStore('user', {
       'gold', 'pearl', 'magic', 'jade',
       'qi', 'mood',
       'lastActiveTimestamp', 'lastDailyReset',
-      'nickname', 'readNoticeIds', 'renameSkipped', 'avatar',
+      'nickname', 'readNoticeIds', 'renameSkipped', 'onboarded', 'avatar',
       'soundOn', 'hapticOn',
       'qiBubbleDate', 'qiBubbleGain',
     ],
