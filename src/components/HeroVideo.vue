@@ -24,9 +24,15 @@
       :loop="!useCrossfade"
       muted
       playsinline
+      webkit-playsinline="true"
+      x5-playsinline="true"
+      x5-video-player-type="h5-page"
+      x5-video-player-fullscreen="false"
+      x5-video-orientation="portraint"
       preload="auto"
       disablepictureinpicture
-      :controlslist="'nofullscreen'"
+      controls="false"
+      controlslist="nofullscreen nodownload noremoteplayback"
       @timeupdate="onTime('A', $event)"
       @ended="onEnded('A')"
       @canplay="onCanplay('A')"
@@ -41,9 +47,15 @@
       :poster="poster"
       muted
       playsinline
+      webkit-playsinline="true"
+      x5-playsinline="true"
+      x5-video-player-type="h5-page"
+      x5-video-player-fullscreen="false"
+      x5-video-orientation="portraint"
       preload="auto"
       disablepictureinpicture
-      :controlslist="'nofullscreen'"
+      controls="false"
+      controlslist="nofullscreen nodownload noremoteplayback"
       @timeupdate="onTime('B', $event)"
       @ended="onEnded('B')"
       @canplay="onCanplay('B')"
