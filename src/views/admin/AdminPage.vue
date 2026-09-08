@@ -71,6 +71,7 @@
         <PoolEditor v-else-if="active.editor === 'pool'" :data="model" />
         <HomeEditor v-else-if="active.editor === 'home'" :home="model" />
         <NoticeEditor v-else-if="active.editor === 'notice'" :data="model" />
+        <ShareEditor v-else-if="active.editor === 'share'" :data="model" />
         <JsonEditor v-else :data="model" :file="active.id" @update="onJsonUpdate" />
       </section>
       <div class="loading" v-else>加载中…</div>
@@ -141,6 +142,7 @@ import RaceEditor from '@/admin/editors/RaceEditor.vue';
 import CheckinEditor from '@/admin/editors/CheckinEditor.vue';
 import PoolEditor from '@/admin/editors/PoolEditor.vue';
 import NoticeEditor from '@/admin/editors/NoticeEditor.vue';
+import ShareEditor from '@/admin/editors/ShareEditor.vue';
 import JsonEditor from '@/admin/components/JsonEditor.vue';
 import { adminFetch, setAdminToken } from '@/admin/api';
 

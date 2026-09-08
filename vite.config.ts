@@ -5,7 +5,7 @@ import legacy from '@vitejs/plugin-legacy';
 import compression from 'vite-plugin-compression';
 import { resolve, dirname, join } from 'path';
 import { fileURLToPath } from 'url';
-import { promises as fs } from 'fs';
+import { promises as fs, readFileSync } from 'fs';
 import { spawn } from 'child_process';
 import autoprefixer from 'autoprefixer';
 
@@ -75,8 +75,11 @@ function adminApiPlugin(tokenFromEnv?: string) {
             const body = JSON.parse(await readBody(req)); // { path, data(base64) }
             const safe = (body.path || '').replace(/^\/+/, '').replace(/\.\.+/g, '');
             // 允许图片/视频/音频落盘：images/videos 走 content 目录，audio 走 public/audio（曲目 src 为 /audio/...）
-            if (!safe || !/^(images|videos|audio)\//.test(safe)) return sendJson(res, 400, { error: '非法路径' });
-            const dest = safe.startsWith('audio/') ? join(__dirname, 'public', safe) : join(contentDir, safe);
+            // og-cover.png 是分享卡片封面，直接落在 public 根目录（服务路径 /og-cover.png）
+            if (!safe || !(/^(images|videos|audio)\//.test(safe) || safe === 'og-cover.png')) return sendJson(res, 400, { error: '非法路径' });
+            const dest = safe === 'og-cover.png'
+              ? join(__dirname, 'public', 'og-cover.png')
+              : safe.startsWith('audio/') ? join(__dirname, 'public', safe) : join(contentDir, safe);
             await fs.mkdir(join(dest, '..'), { recursive: true });
             await fs.writeFile(dest, Buffer.from(body.data || '', 'base64'));
             return sendJson(res, 200, { ok: true, url: '/' + safe });
@@ -116,6 +119,45 @@ function adminApiPlugin(tokenFromEnv?: string) {
           return sendJson(res, 500, { error: String(e?.message || e) });
         }
       });
+    },
+  };
+}
+
+// 分享卡片 meta 注入：构建（及 dev 预览）时根据 public/content/share.json 生成 OG/Twitter 标签。
+// 爬虫读静态 HTML，故 meta 必须写进 index.html（运行时 JS 注入爬虫看不到），本插件在打包阶段注入。
+// share.json 缺失时用默认兜底，保证链接卡片永远可用。
+function shareMetaPlugin(rootDir: string) {
+  const DEF = {
+    title: '灵境 · 治愈小生物',
+    description: '东方治愈 · 沉浸式休闲空间。养成你的灵境小生物，收集、种植、聆听与旅行。',
+    image: 'https://kekeliang1983-ship-it.github.io/og-cover.png',
+  };
+  const SITE_URL = 'https://kekeliang1983-ship-it.github.io/';
+  return {
+    name: 'share-meta-inject',
+    transformIndexHtml(html: string) {
+      let cfg = { ...DEF };
+      try {
+        const raw = readFileSync(join(rootDir, 'public', 'content', 'share.json'), 'utf-8');
+        cfg = { ...DEF, ...JSON.parse(raw) };
+      } catch { /* 用默认兜底 */ }
+      const tags = [
+        `<title>${cfg.title}</title>`,
+        `<meta name="description" content="${cfg.description}" />`,
+        `<meta property="og:site_name" content="${cfg.title}" />`,
+        `<meta property="og:title" content="${cfg.title}" />`,
+        `<meta property="og:description" content="${cfg.description}" />`,
+        `<meta property="og:type" content="website" />`,
+        `<meta property="og:url" content="${SITE_URL}" />`,
+        `<meta property="og:image" content="${cfg.image}" />`,
+        `<meta property="og:image:width" content="1200" />`,
+        `<meta property="og:image:height" content="630" />`,
+        `<meta name="twitter:card" content="summary_large_image" />`,
+        `<meta name="twitter:title" content="${cfg.title}" />`,
+        `<meta name="twitter:description" content="${cfg.description}" />`,
+        `<meta name="twitter:image" content="${cfg.image}" />`,
+      ].join('\n  ');
+      return html.replace('<!-- 分享卡片 meta 由构建插件根据 public/content/share.json 注入（微信/QQ/微博等链接卡片） -->', tags);
     },
   };
 }
@@ -292,6 +334,9 @@ export default defineConfig(({ mode }: ConfigEnv) => {
 
       // 本地可视化内容后台（仅 dev：configureServer 不进生产构建）
       adminApiPlugin(env.ADMIN_TOKEN),
+
+      // 分享卡片 meta 注入（构建 + dev 预览均生效；读取 public/content/share.json）
+      shareMetaPlugin(__dirname),
     ],
 
     optimizeDeps: {
