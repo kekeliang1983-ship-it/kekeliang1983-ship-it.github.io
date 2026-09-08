@@ -118,9 +118,19 @@ export default defineConfig(({ mode }: ConfigEnv) => {
     publicDir: 'public',
 
     // 固定 dev 端口，避免 5173→5174→5175 跳变，后台地址稳定为 localhost:5173
+    // 注意：本文件曾存在两个 server 块，后者会静默覆盖前者导致 strictPort 失效，现合并为一处
     server: {
       port: 5173,
+      host: true,
       strictPort: true,
+      proxy: {
+        '/api': {
+          target: env.VITE_API_BASE_URL || 'http://localhost:3000',
+          changeOrigin: true,
+        },
+      },
+      hmr: { overlay: true, protocol: 'ws' },
+      warmup: { clientFiles: ['./src/App.vue', './src/main.ts'] },
     },
 
     resolve: {
@@ -140,20 +150,6 @@ export default defineConfig(({ mode }: ConfigEnv) => {
       postcss: {
         plugins: [autoprefixer as any],
       },
-    },
-
-    server: {
-      port: 5173,
-      host: true,
-      strictPort: false,
-      proxy: {
-        '/api': {
-          target: env.VITE_API_BASE_URL || 'http://localhost:3000',
-          changeOrigin: true,
-        },
-      },
-      hmr: { overlay: true, protocol: 'ws' },
-      warmup: { clientFiles: ['./src/App.vue', './src/main.ts'] },
     },
 
     preview: { port: 4173, host: true },

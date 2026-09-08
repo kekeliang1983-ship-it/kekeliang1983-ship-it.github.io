@@ -88,6 +88,48 @@ function setTabRef(k: string, el: any) {
   if (el) tabRefs.value[k] = el;
 }
 
+/* ================================================================
+   首入轻提示（设计稿 docs/onboarding-design.md §四）：
+   首次进入首页后，按顺序对「仙宠 → 灵植 → 天籁」做一次性脉冲，引导视线。
+   - 标志位 cc_tabhint_done；已标记则不再打扰
+   - 只动 tab 内部 SVG 的 scale（不碰 tab-item 的 color/y/scale，避免与下方切换动画冲突）
+   - 用户一旦点了任意 Tab 立即停止并置位，尊重主动操作
+================================================================ */
+const TABHINT_KEY = 'cc_tabhint_done';
+const TABHINT_ORDER: TabKey[] = ['pet', 'farm', 'music'];
+let hintTl: any = null;
+let hintTimer: number | undefined;
+
+function markTabHintDone() {
+  try { localStorage.setItem(TABHINT_KEY, '1'); } catch (_e) {}
+}
+function stopTabHint() {
+  try { hintTl?.kill(); } catch (_e) {}
+  hintTl = null;
+  window.clearTimeout(hintTimer);
+  markTabHintDone();
+}
+function runTabHint() {
+  try {
+    if (localStorage.getItem(TABHINT_KEY)) return;
+    const g = (window as any).gsap;
+    const els = TABHINT_ORDER.map((k) => tabRefs.value[k]?.querySelector('svg')).filter(Boolean) as SVGElement[];
+    if (!els.length) { markTabHintDone(); return; }
+    if (!g) { markTabHintDone(); return; } // 无 GSAP 则不强撑动画，直接标记完成
+    hintTl = g.timeline({ onComplete: markTabHintDone });
+    els.forEach((el, i) => {
+      hintTl.fromTo(
+        el,
+        { scale: 1 },
+        { scale: 1.22, duration: 0.26, ease: 'power2.out', yoyo: true, repeat: 1 },
+        i * 0.5,
+      );
+    });
+  } catch (_e) {
+    markTabHintDone();
+  }
+}
+
 /* ---------- safeAreaBottom读取（实际真机下才有值）---------- */
 onMounted(() => {
   const env =
@@ -97,6 +139,8 @@ onMounted(() => {
     (getComputedStyle(document.documentElement) as any)['padding-bottom']?.replace('px', '') ||
     '0';
   safeAreaBottom.value = env ? parseInt(env, 10) : 0;
+  // 延后 0.8s：避开入场动画与首屏渲染，让脉冲更容易被注意到
+  hintTimer = window.setTimeout(runTabHint, 800);
 });
 
 /* ================================================================
@@ -107,6 +151,8 @@ onMounted(() => {
 function switchTab(key: TabKey) {
   audio.play('click');
   haptic.play('light');
+  // 用户主动点了 Tab → 首入提示立即收尾，不再打扰
+  stopTabHint();
   const g = (window as any).gsap;
   const prev = currentTab.value;
   const prevEl = tabRefs.value[prev] || null;
@@ -147,6 +193,7 @@ function switchTab(key: TabKey) {
 /* ---------- 卸载时清理当前tab的内联y/scale（避免下次进入样式被破坏）---------- */
 onBeforeUnmount(() => {
   const g = (window as any).gsap;
+  stopTabHint(); // 清定时器 + kill 脉冲时间轴
   if (!g) return;
   try {
     Object.values(tabRefs.value).forEach((el) => {
