@@ -27,6 +27,13 @@ if (typeof document !== 'undefined') {
 // 避免「首帧/换源时 play() 在加载完成前被浏览器拒绝 → 永久停在首帧、静默不播」。
 let wantsPlay = false;
 
+// iOS Safari 仅在「用户手势内」允许 play()；非手势（如 canplay 事件处理器）的 play() 会被静默拒绝。
+// 桌面/安卓浏览器允许非手势 play，故重试策略需分端。iPadOS 13+ 的 UA 伪装成 Macintosh 且带触屏。
+const isIOS =
+  typeof navigator !== 'undefined' &&
+  (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.userAgent.includes('Macintosh') && typeof document !== 'undefined' && 'ontouchend' in document));
+
 const isPlaying = ref(false);
 const currentTrackId = ref(modules.musicTracks.find((t) => t.isUnlocked)?.id ?? '');
 const position = ref(0);      // 当前曲目已播秒数（进度条，真实音频时间）
@@ -121,8 +128,18 @@ function tryPlay() {
     p.catch(() => {});
   }
 }
-player.addEventListener('loadeddata', () => { if (wantsPlay && player.paused) tryPlay(); });
-player.addEventListener('canplay', () => { if (wantsPlay && player.paused) tryPlay(); });
+// 非 iOS（桌面/安卓）允许非手势 play，故数据就绪后自动补播；iOS 下不在此处重试（会被静默拒绝）。
+player.addEventListener('loadeddata', () => { if (!isIOS && wantsPlay && player.paused) tryPlay(); });
+player.addEventListener('canplay', () => { if (!isIOS && wantsPlay && player.paused) tryPlay(); });
+
+/* iOS 解锁：首次 play 若在手势内被拒，注册一次性用户手势监听，在下一个真实手势（touch/click）内补 play。
+   该 listener 本身处于用户手势上下文，iOS 允许 play()。非 iOS 无需此机制。 */
+function armGestureUnlock() {
+  if (!isIOS || typeof document === 'undefined') return;
+  const handler = () => { if (wantsPlay && player.paused) tryPlay(); };
+  document.addEventListener('touchstart', handler, { once: true, passive: true });
+  document.addEventListener('click', handler, { once: true });
+}
 
 /* ---------- Media Session（锁屏控制 + 后台保活） ---------- */
 function setupMediaSession(t: IMusicTrack) {
@@ -149,11 +166,14 @@ function playTrack(t: IMusicTrack) {
   position.value = 0;
   if (t.src) {
     wantsPlay = true;
-    player.src = t.src;
+    if (player.src !== t.src) player.src = t.src;
+    try { player.load(); } catch { /* ignore */ }
     player.currentTime = 0;
     setupMediaSession(t);
-    // 仅由真实 'play' 事件驱动 isPlaying；被拒则由 canplay/loadeddata 重试（见上）
+    // 手势内首次尝试：iOS 会记住此手势意图，数据就绪后自动续播
     tryPlay();
+    // iOS 兜底：若首次 play 在手势内被拒（数据未就绪），随后任意用户触摸/点击（仍在手势内）再补一次 play
+    armGestureUnlock();
   } else {
     wantsPlay = false;
     isPlaying.value = false;

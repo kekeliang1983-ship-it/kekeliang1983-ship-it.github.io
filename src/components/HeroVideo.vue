@@ -12,6 +12,8 @@
 -->
 <template>
   <div class="hero-video-wrap" ref="root">
+    <!-- 静态 poster 兜底层：视频加载/缓冲/失败空窗时始终显示封面，杜绝「图丢/空白」体感 -->
+    <div v-if="poster" class="hv-poster" :style="{ backgroundImage: `url(${poster})` }"></div>
     <!-- 主层 A：crossfade 关闭时走原生 loop 硬循环（省电）；开启时由交叉逻辑控制 -->
     <video
       ref="vA"
@@ -215,6 +217,17 @@ onBeforeUnmount(() => {
   position: absolute;
   inset: 0;
   overflow: hidden;
+  background: #c9c3f0; /* 视频/海报未就绪时的温和底色兜底 */
+}
+.hv-poster {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  z-index: 0;
 }
 .hv {
   position: absolute;
@@ -224,6 +237,7 @@ onBeforeUnmount(() => {
   object-fit: cover;
   display: block;
   opacity: 0;
+  z-index: 1; /* 视频层在 poster 兜底层之上；视频未就绪/透明时露出底层图 */
   /* 方案四：交叉淡入时长柔化（比生切柔和） */
   transition: opacity 0.6s ease-in-out;
   will-change: opacity;
