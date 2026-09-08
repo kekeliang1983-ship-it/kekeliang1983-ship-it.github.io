@@ -126,6 +126,8 @@ export interface BannerContent {
   showDots?: boolean;
   /** 视频循环是否启用交叉淡入丝滑过渡(默认 true；false=单视频硬 loop 省电) */
   videoCrossfade?: boolean;
+  /** 动画 WebP 兜底地址：对会劫持 <video> 的浏览器(小米/华为/百度/QQ 等)用 <img> 动画替代，杜绝系统播放器浮层 */
+  loopWebp?: string;
   /** 轮播帧列表（核心） */
   slides?: BannerSlide[];
   /** @deprecated 旧单对象兼容字段，加载时自动归一化进 slides */
@@ -138,7 +140,7 @@ export interface BannerContent {
 /** 把任意 banner 数据归一化为「轮播结构」，保证 HomePage/编辑器拿到的总是标准形态 */
 function normalizeBanner(data: any): BannerContent {
   const fallback: BannerContent = {
-    autoplay: true, interval: 5000, transition: 'fade', showDots: true, videoCrossfade: true, slides: [],
+    autoplay: true, interval: 5000, transition: 'fade', showDots: true, videoCrossfade: true, loopWebp: '', slides: [],
   };
   if (!data || typeof data !== 'object') return fallback;
   // 新结构：已有 slides
@@ -149,6 +151,7 @@ function normalizeBanner(data: any): BannerContent {
       transition: data.transition === 'slide' ? 'slide' : 'fade',
       showDots: data.showDots ?? true,
       videoCrossfade: data.videoCrossfade ?? true,
+      loopWebp: data.loopWebp || '',
       slides: data.slides.map((s: any, i: number) => ({
         id: s?.id || `s${i + 1}`,
         bgType: s?.bgType === 'video' ? 'video' : 'image',
@@ -336,7 +339,7 @@ export const useContentStore = defineStore('content', {
         .sort((a, b) => a.order - b.order);
     },
     bannerContent(state): BannerContent {
-      return state.banner || { autoplay: true, interval: 5000, transition: 'fade', showDots: true, videoCrossfade: true, slides: [] };
+      return state.banner || { autoplay: true, interval: 5000, transition: 'fade', showDots: true, videoCrossfade: true, loopWebp: '', slides: [] };
     },
     homeContent(state): HomeContent | null {
       return state.home;

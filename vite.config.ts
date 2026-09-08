@@ -82,6 +82,41 @@ function adminApiPlugin(tokenFromEnv?: string) {
               : safe.startsWith('audio/') ? join(__dirname, 'public', safe) : join(contentDir, safe);
             await fs.mkdir(join(dest, '..'), { recursive: true });
             await fs.writeFile(dest, Buffer.from(body.data || '', 'base64'));
+
+            // Banner 视频上传后：自动重转「动画 WebP」兜底，并刷新 banner.json 的 loopWebp 缓存戳，
+            // 保证小米/华为/百度等会劫持 <video> 的浏览器拿到与视频同步的动画图。
+            if (/^videos\/banner-video/i.test(safe)) {
+              try {
+                const outWebp = join(contentDir, 'videos', 'banner-loop.webp');
+                await new Promise<void>((resolveGen) => {
+                  const child = spawn(
+                    process.execPath,
+                    ['scripts/gen-banner-webp.mjs', dest, outWebp],
+                    { cwd: __dirname },
+                  );
+                  let glog = '';
+                  child.stdout.on('data', (d: any) => (glog += d.toString()));
+                  child.stderr.on('data', (d: any) => (glog += d.toString()));
+                  child.on('close', (code: number) => {
+                    if (code === 0) {
+                      // 刷新 banner.json 里 loopWebp 的 ?t= 缓存戳，避免旧 webp 被缓存
+                      const bj = join(contentDir, 'banner.json');
+                      try {
+                        const raw = JSON.parse(await fs.readFile(bj, 'utf8'));
+                        raw.loopWebp = `/content/videos/banner-loop.webp?t=${Date.now()}`;
+                        await fs.writeFile(bj, JSON.stringify(raw, null, 2));
+                      } catch { /* ignore */ }
+                    } else {
+                      console.warn('[admin] gen-banner-webp failed:', glog.slice(-500));
+                    }
+                    resolveGen();
+                  });
+                });
+              } catch (e: any) {
+                console.warn('[admin] banner webp regen skipped:', e?.message);
+              }
+            }
+
             return sendJson(res, 200, { ok: true, url: '/' + safe });
           }
           if (req.method === 'POST' && root === 'publish') {

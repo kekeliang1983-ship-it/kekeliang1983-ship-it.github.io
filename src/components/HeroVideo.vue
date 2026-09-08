@@ -1,41 +1,57 @@
 <!--
   src/components/HeroVideo.vue
-  首页 Hero Banner 的视频渲染组件。
+  首页 Hero Banner 的渲染组件。
 
   跨浏览器通用方案（核心目标：无论什么浏览器都不出现原生播放器控件）：
-  国产浏览器（微信/QQ/X5、百度、华为/小米/OPPO/vivo、UC、夸克等）会强制劫持 <video>，
-  在元素上绘制自己的播放器 UI（进度条/下载/TV/听/存网盘），靠 controls/playsinline/X5
-  属性只能减少、无法彻底禁止。
 
-  解法：所有浏览器统一走 Canvas 渲染 ——
-    1) 真正的 <video> 作为"解码源"藏在底层（opacity:0，仍在 DOM 内可正常解码、可自动播放）；
-    2) 上层放一个不透明的 <canvas>，用 requestAnimationFrame 把视频当前帧实时 drawImage 上去；
-    3) Canvas 只是普通画布，浏览器不会给它注入任何原生播放控件，因此 PC/手机/各内核表现完全一致。
-  静态 poster 兜底层始终存在：视频未就绪/缓冲/失败/「减少动态」时显示封面，杜绝空白体感。
+  部分国产浏览器（小米 MIUI 浏览器、华为、OPPO/vivo、百度、QQ/微信 X5、UC、夸克等）
+  会劫持 <video> —— 一旦页面里有 <video> 开始播放，它们会在「浏览器层级」弹出自己的系统
+  播放器浮层（进度条/下载/TV/听/存网盘）。这个浮层不在网页 DOM 里，是浏览器盖在最上层的 UI，
+  所以仅靠 controls/playsinline/X5 属性、甚至用 <canvas> 盖住视频都挡不住它。
+
+  根治办法：对这类浏览器，<video> 元素根本不要出现 —— 改用「会自己动起来的图片」
+  动画 WebP（<img>），图片永远不会被系统播放器劫持，因此零控件、行为一致。
+
+  分流：
+    1) 会被劫持的浏览器（UA 命中名单）且有 loopWebp → 直接渲染 <img :src="loopWebp">
+       （动画 WebP 自动循环播放，无任何控件，PC/手机/各内核表现一致）。
+    2) 其它现代浏览器（Chrome/Safari/Firefox/Edge 等）→ 用隐藏 <video> 作解码源、上层不透明
+       <canvas> 实时绘制视频帧，同样不给原生控件，且画质更高、可控播放。
+  静态 poster 兜底层始终存在：视频/图片未就绪、缓冲、"减少动态"时显示封面，杜绝空白体感。
 -->
 <template>
   <div class="hero-video-wrap" ref="root">
-    <!-- 静态 poster 兜底层：视频加载/缓冲/失败/减动时显示封面，杜绝空白 -->
+    <!-- 静态 poster 兜底层：视频/图片未就绪/缓冲/失败/减动时显示封面，杜绝空白 -->
     <div v-if="poster" class="hv-poster" :style="{ backgroundImage: `url(${poster})` }"></div>
 
-    <!-- 解码源：藏在底层、不可见、不接管任何交互，仅用于把帧喂给 canvas -->
-    <video
-      ref="srcVideo"
-      class="hv-source"
-      :src="realSrc"
-      :poster="poster"
-      muted
-      loop
-      playsinline
-      preload="auto"
-      webkit-playsinline="true"
-      x5-playsinline="true"
-      x5-video-player-type="h5"
-      x5-video-player-fullscreen="false"
-    ></video>
+    <!-- 分支 A：会被劫持的浏览器 → 动画 WebP 图片（无 <video>，永不弹系统播放器） -->
+    <img
+      v-if="useImg && !reduceMotion"
+      class="hv-img"
+      :src="props.loopSrc"
+      alt=""
+      aria-hidden="true"
+      decoding="async"
+    />
 
-    <!-- 可见层：实时绘制视频帧，盖住底层隐藏 video，任何浏览器都不会给它加原生控件 -->
-    <canvas ref="canvas" class="hv-canvas" :class="{ on: canvasReady }" aria-hidden="true"></canvas>
+    <!-- 分支 B：现代浏览器 → 隐藏 <video> 解码源 + 上层不透明 <canvas> 实时绘制帧 -->
+    <template v-else>
+      <video
+        ref="srcVideo"
+        class="hv-source"
+        :src="realSrc"
+        :poster="poster"
+        muted
+        loop
+        playsinline
+        preload="auto"
+        webkit-playsinline="true"
+        x5-playsinline="true"
+        x5-video-player-type="h5"
+        x5-video-player-fullscreen="false"
+      ></video>
+      <canvas ref="canvas" class="hv-canvas" :class="{ on: canvasReady }" aria-hidden="true"></canvas>
+    </template>
   </div>
 </template>
 
@@ -45,15 +61,17 @@ import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 const props = defineProps<{
   src: string;
   poster?: string;
+  /** 动画 WebP 兜底地址：对会劫持 <video> 的浏览器使用（<img> 永不被系统播放器劫持） */
+  loopSrc?: string;
   /** 是否当前可见帧：外层轮播切走时暂停，避免后台解码浪费 */
   playing?: boolean;
-  /** 视频循环是否启用丝滑过渡（保留兼容，本组件直接用 video loop，无需额外处理） */
+  /** 视频循环丝滑过渡（保留兼容，分支 B 直接用 video loop） */
   crossfade?: boolean;
-  /** 后台预览用：忽略系统"减少动态"偏好，强制自动播放，便于运营查看效果 */
+  /** 后台预览用：忽略系统"减少动态"偏好，强制自动播放 */
   ignoreReducedMotion?: boolean;
 }>();
 
-// 空 src 时不绑定 <video src>（避免浏览器把空串当当前页请求）
+// 空 src 时不绑定 <video src>
 const realSrc = computed(() => (props.src ? props.src : undefined));
 
 const root = ref<HTMLElement | null>(null);
@@ -72,7 +90,18 @@ const sysReduceMotion =
   matchMedia('(prefers-reduced-motion: reduce)').matches;
 const reduceMotion = computed(() => sysReduceMotion && !props.ignoreReducedMotion);
 
-/* ---------- canvas 绘制 ---------- */
+/** 检测是否在会强制劫持 <video> 并弹出系统播放器浮层的浏览器中运行（这些浏览器必须用 <img> 动画兜底） */
+function browserHijacksVideo(): boolean {
+  if (typeof navigator === 'undefined') return false;
+  const ua = navigator.userAgent.toLowerCase();
+  return /micromessenger|qqbrowser|mqqbrowser|tbs\/|x5|ucbrowser|ucweb|baiduboxapp|baidubrowser|baiduapp|quark|sogou|liebao|qihoo|360browser|2345|miuibrowser|xiaomi|redmi|huawei|honor|vivo|oppo|oneplus|realme|lenovo|flyme|mxbrowser|taobao|tmall|weibo|douyin|toutiao/i.test(
+    ua,
+  );
+}
+// 分支 A：命中劫持名单且有动画 WebP → 用 <img> 动画兜底（彻底无 <video>）
+const useImg = computed(() => !!props.loopSrc && browserHijacksVideo());
+
+/* ---------- 分支 B：canvas 绘制 ---------- */
 function fitCanvas() {
   if (!canvas.value || !root.value) return;
   const rect = root.value.getBoundingClientRect();
@@ -83,12 +112,9 @@ function fitCanvas() {
   canvas.value.style.height = `${rect.height}px`;
   if (ctx) {
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    // 变换变了，立刻重绘一帧（封面或视频）
     drawFrame();
   }
 }
-
-/** 把图像（poster 或视频）按 cover 方式绘制到 canvas */
 function drawCover(img: CanvasImageSource, iw: number, ih: number) {
   if (!ctx || !canvas.value) return;
   const cw = canvas.value.width / (window.devicePixelRatio || 1);
@@ -112,7 +138,6 @@ function drawCover(img: CanvasImageSource, iw: number, ih: number) {
   ctx.clearRect(0, 0, cw, ch);
   ctx.drawImage(img, x, y, w, h);
 }
-
 function drawFrame() {
   const v = srcVideo.value;
   if (v && v.videoWidth && canvasReady.value && !reduceMotion.value) {
@@ -121,12 +146,10 @@ function drawFrame() {
     drawCover(posterImg, posterImg.naturalWidth, posterImg.naturalHeight);
   }
 }
-
 function loop() {
   drawFrame();
   rafId = requestAnimationFrame(loop);
 }
-
 function startLoop() {
   if (!rafId) rafId = requestAnimationFrame(loop);
 }
@@ -136,8 +159,6 @@ function stopLoop() {
     rafId = 0;
   }
 }
-
-/* ---------- 播放控制 ---------- */
 function playSource() {
   const v = srcVideo.value;
   if (!v) return;
@@ -150,14 +171,14 @@ function pauseSource() {
     try { v.pause(); } catch (_e) {}
   }
 }
-
 function applyPlaying() {
-  if (reduceMotion.value) {
-    // 减少动态：仅显示 poster，不播放也不画视频
+  if (reduceMotion.value || useImg.value) {
     pauseSource();
     stopLoop();
-    canvasReady.value = false; // 让 drawFrame 走 poster 分支
-    drawFrame();
+    if (!useImg.value) {
+      canvasReady.value = false;
+      drawFrame();
+    }
     return;
   }
   if (props.playing) {
@@ -168,16 +189,12 @@ function applyPlaying() {
     stopLoop();
   }
 }
-
-/* ---------- 源事件 ---------- */
 function onCanplay() {
   if (!srcVideo.value) return;
   canvasReady.value = true;
   drawFrame();
-  if (props.playing && !reduceMotion.value) playSource();
+  if (props.playing && !reduceMotion.value && !useImg.value) playSource();
 }
-
-/* ---------- poster 预加载（canvas 初始即显示封面，避免空白/闪原生控件） ---------- */
 function loadPoster() {
   if (!props.poster) {
     posterImg = null;
@@ -191,8 +208,6 @@ function loadPoster() {
   };
   img.src = props.poster;
 }
-
-/* ---------- 源切换（后台换视频 / 切帧） ---------- */
 function loadSource() {
   const v = srcVideo.value;
   if (!v) return;
@@ -205,13 +220,12 @@ function loadSource() {
     v.load();
   }
 }
-
-/* ---------- 离屏 / 标签页隐藏 暂停，省电 ---------- */
 function setupObserver() {
   if (typeof IntersectionObserver === 'undefined' || !root.value) return;
   io = new IntersectionObserver(
     (entries) => {
       const vis = entries.some((en) => en.isIntersecting);
+      if (useImg.value || reduceMotion.value) return; // 分支 A / 减动无需控制
       if (vis) applyPlaying();
       else {
         pauseSource();
@@ -223,6 +237,7 @@ function setupObserver() {
   io.observe(root.value);
 }
 function onVisibility() {
+  if (useImg.value || reduceMotion.value) return;
   if (document.hidden) {
     pauseSource();
     stopLoop();
@@ -231,14 +246,11 @@ function onVisibility() {
   }
 }
 function onResize() {
-  fitCanvas();
+  if (!useImg.value) fitCanvas();
 }
-
-/* iOS / 严格内核兜底：若自动播放被拒（首帧迟迟不来），用户首次触摸/点击时补一次播放 */
 function unlockOnGesture() {
   const v = srcVideo.value;
-  if (!v) return;
-  if (!v.paused) return; // 已经在播就不必
+  if (!v || !v.paused) return;
   playSource();
 }
 
@@ -254,7 +266,6 @@ onMounted(() => {
     v.addEventListener('canplay', onCanplay);
     loadSource();
   }
-  // 绑定一次性手势解锁（仅用于自动播放被拒的浏览器，正常播放后不再触发）
   root.value?.addEventListener('touchstart', unlockOnGesture, { once: true, passive: true });
   root.value?.addEventListener('click', unlockOnGesture, { once: true });
   applyPlaying();
@@ -290,7 +301,7 @@ watch(
   position: absolute;
   inset: 0;
   overflow: hidden;
-  background: #c9c3f0; /* 视频/海报未就绪时的温和底色兜底 */
+  background: #c9c3f0;
 }
 .hv-poster {
   position: absolute;
@@ -302,18 +313,29 @@ watch(
   background-repeat: no-repeat;
   z-index: 0;
 }
-/* 解码源：藏在底层、完全不可见、不接管交互；仅负责把帧喂给上层 canvas */
+/* 分支 A：动画 WebP 图片，覆盖整个 Banner，自动循环、绝对无原生控件 */
+.hv-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  z-index: 1;
+  pointer-events: none;
+}
+/* 分支 B：解码源，藏在底层不可见、不接管交互，只把帧喂给上层 canvas */
 .hv-source {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  opacity: 0; /* 透明：不再显示原生播放器控件（控件随元素整体透明） */
-  pointer-events: none; /* 不拦截任何点击 */
+  opacity: 0;
+  pointer-events: none;
   z-index: 1;
 }
-/* 可见层：实时绘制视频帧，盖住底层隐藏 video；任何浏览器都不会给 canvas 注入播放控件 */
+/* 分支 B：可见层，实时绘制视频帧，盖住隐藏 video；任何浏览器都不会给 canvas 注入播放控件 */
 .hv-canvas {
   position: absolute;
   inset: 0;

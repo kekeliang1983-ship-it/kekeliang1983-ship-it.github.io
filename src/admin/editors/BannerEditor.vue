@@ -34,7 +34,7 @@
         <HeroVideo
           v-if="slide && slide.bgType === 'video' && slide.bgVideo"
           :src="slide.bgVideo" :poster="slide.videoPoster"
-          :playing="true" :crossfade="banner.videoCrossfade !== false"
+          :playing="true" :crossfade="banner.videoCrossfade !== false" :loop-src="banner.loopWebp"
           :ignore-reduced-motion="true"
         />
         <BannerParticles

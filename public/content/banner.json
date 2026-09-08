@@ -4,6 +4,7 @@
   "transition": "fade",
   "showDots": true,
   "videoCrossfade": true,
+  "loopWebp": "/content/videos/banner-loop.webp?t=1788891100000",
   "slides": [
     {
       "id": "s1",

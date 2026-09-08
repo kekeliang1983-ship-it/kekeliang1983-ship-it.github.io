@@ -77,7 +77,7 @@
             :class="{ active: i === heroIndex }"
           >
             <div v-if="s.bgType === 'video'" class="hero-bg">
-              <HeroVideo :src="s.bgVideo || ''" :poster="s.videoPoster" :playing="i === heroIndex" :crossfade="banner.videoCrossfade !== false" />
+              <HeroVideo :src="s.bgVideo || ''" :poster="s.videoPoster" :loop-src="banner.loopWebp" :playing="i === heroIndex" :crossfade="banner.videoCrossfade !== false" />
             </div>
             <div v-else class="hero-bg" :style="bgStyleOf(s)"></div>
             <div v-if="!s.bgImage && !s.bgVideo && s.bgEmoji" class="hero-emoji">{{ s.bgEmoji }}</div>
