@@ -26,12 +26,12 @@
       playsinline
       webkit-playsinline="true"
       x5-playsinline="true"
-      x5-video-player-type="h5-page"
+      x5-video-player-type="h5"
       x5-video-player-fullscreen="false"
       x5-video-orientation="portraint"
       preload="auto"
       disablepictureinpicture
-      controls="false"
+      disableRemotePlayback
       controlslist="nofullscreen nodownload noremoteplayback"
       @timeupdate="onTime('A', $event)"
       @ended="onEnded('A')"
@@ -49,12 +49,12 @@
       playsinline
       webkit-playsinline="true"
       x5-playsinline="true"
-      x5-video-player-type="h5-page"
+      x5-video-player-type="h5"
       x5-video-player-fullscreen="false"
       x5-video-orientation="portraint"
       preload="auto"
       disablepictureinpicture
-      controls="false"
+      disableRemotePlayback
       controlslist="nofullscreen nodownload noremoteplayback"
       @timeupdate="onTime('B', $event)"
       @ended="onEnded('B')"
