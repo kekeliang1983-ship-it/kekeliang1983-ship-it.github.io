@@ -1,6 +1,13 @@
-<!-- src/views/splash/SplashPage.vue —— 启动页（2页Logo轮播，参考07-应用骨架）-->
+<!-- src/views/splash/SplashPage.vue —— 启动页（2页Logo轮播 + 加载进度，参考07-应用骨架）-->
 <template>
   <div class="splash-page" ref="rootRef">
+    <!-- 流动光晕背景（东方治愈 · 静心氛围，争取加载时间不显突兀） -->
+    <div class="aurora">
+      <span class="blob b1"></span>
+      <span class="blob b2"></span>
+      <span class="blob b3"></span>
+    </div>
+
     <!-- Logo 轮播容器 -->
     <div class="splash-track" ref="trackRef" v-show="!showOnboarding">
       <!-- 第1页：工作室Logo -->
@@ -15,10 +22,16 @@
         <p class="brand-slogan">静心 · 耕种 · 祈愿</p>
       </div>
     </div>
+
     <!-- 进度指示点 -->
-    <div class="splash-dots">
+    <div class="splash-dots" v-show="!showOnboarding">
       <i :class="{ active: slideIdx === 0 }"></i>
       <i :class="{ active: slideIdx >= 1 }"></i>
+    </div>
+
+    <!-- 底部加载进度条（纯装饰：覆盖首屏资源就绪时间，避免"白屏等待感"） -->
+    <div class="splash-progress" v-show="!showOnboarding">
+      <div class="bar" :style="{ width: progress + '%' }"></div>
     </div>
 
     <!-- 新手引导覆盖层（首访触发；完成/跳过后再进首页）-->
@@ -41,6 +54,7 @@ const rootRef = ref<HTMLElement | null>(null);
 const trackRef = ref<HTMLElement | null>(null);
 const slideIdx = ref(0);
 const showOnboarding = ref(false);
+const progress = ref(0);
 
 // 定时器引用（统一管理，防泄漏：project_memory Anti-Pattern）
 const timers = shallowRef<number[]>([]);
@@ -50,8 +64,20 @@ const clearAllTimers = () => {
   timers.value = [];
 };
 
+// 进度条动画：整个启动流程约 3.1s，进度平滑走到 ~96%，进首页后由页面接管
+let raf = 0;
+function tickProgress() {
+  // 缓出：先快后慢，停在 96% 让"即将完成"的观感自然
+  const target = 96;
+  progress.value += (target - progress.value) * 0.04 + 0.15;
+  if (progress.value >= target) progress.value = target;
+  raf = requestAnimationFrame(tickProgress);
+}
+
 // 切到第2页（1.6s后）→ 跳/home（再1.4s后），总3s
 onMounted(() => {
+  raf = requestAnimationFrame(tickProgress);
+
   // 尝试使用GSAP（如果可用），否则CSS过渡兜底
   const useGsap = (window as any).gsap;
   const track = trackRef.value;
@@ -81,6 +107,7 @@ function onOnboardingFinish() {
 }
 
 onBeforeUnmount(() => {
+  cancelAnimationFrame(raf);
   clearAllTimers();
   // GSAP兜底清理（按元素杀：project_memory Anti-Pattern ❌2）
   try {
@@ -97,13 +124,47 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background:
-    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, .75), transparent 35%),
-    radial-gradient(circle at 80% 70%, rgba(180, 188, 235, .45), transparent 40%),
-    linear-gradient(180deg, #EDEFF9 0%, #E1E4F2 60%, #EEF0F7 100%);
+  background: linear-gradient(180deg, #EDEFF9 0%, #E1E4F2 60%, #EEF0F7 100%);
 }
 
+/* ===== 流动光晕背景 ===== */
+.aurora {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  filter: blur(8px);
+}
+.aurora .blob {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.55;
+  will-change: transform;
+}
+.aurora .b1 {
+  width: 60vw; height: 60vw;
+  left: -15vw; top: -10vh;
+  background: radial-gradient(circle, rgba(168,128,216,.55), transparent 70%);
+  animation: drift1 11s ease-in-out infinite;
+}
+.aurora .b2 {
+  width: 55vw; height: 55vw;
+  right: -18vw; top: 20vh;
+  background: radial-gradient(circle, rgba(214,180,93,.40), transparent 70%);
+  animation: drift2 13s ease-in-out infinite;
+}
+.aurora .b3 {
+  width: 50vw; height: 50vw;
+  left: 20vw; bottom: -20vh;
+  background: radial-gradient(circle, rgba(163,200,235,.50), transparent 70%);
+  animation: drift3 15s ease-in-out infinite;
+}
+@keyframes drift1 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(6vw,4vh) scale(1.08); } }
+@keyframes drift2 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-5vw,3vh) scale(1.1); } }
+@keyframes drift3 { 0%,100% { transform: translate(0,0) scale(1); } 50% { transform: translate(4vw,-4vh) scale(1.06); } }
+
 .splash-track {
+  position: relative;
+  z-index: 2;
   display: flex;
   width: 200%;
   height: 100%;
@@ -126,24 +187,31 @@ onBeforeUnmount(() => {
 .logo-mark {
   font-size: 72px;
   filter: drop-shadow(0 8px 20px rgba(160, 150, 220, .3));
-  animation: float 2.4s ease-in-out infinite;
+  animation: float 2.4s ease-in-out infinite, glowPulse 3.2s ease-in-out infinite;
 }
 @keyframes float {
   0%,100% { transform: translateY(0); }
   50%     { transform: translateY(-10px); }
+}
+@keyframes glowPulse {
+  0%,100% { filter: drop-shadow(0 8px 20px rgba(160,150,220,.30)); }
+  50%     { filter: drop-shadow(0 10px 30px rgba(168,128,216,.55)); }
 }
 .studio-name {
   font-size: 28px;
   font-weight: 700;
   color: var(--text-primary, #292A38);
   letter-spacing: 4px;
+  animation: fadeUp .6s ease both;
 }
 .studio-subtitle {
   font-size: 12px;
   color: var(--text-muted, #A0A4B2);
   letter-spacing: 3px;
   opacity: .85;
+  animation: fadeUp .6s .1s ease both;
 }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 /* ===== 品牌页 ===== */
 .brand-mark {
@@ -155,20 +223,24 @@ onBeforeUnmount(() => {
   background-clip: text;
   color: transparent;
   text-shadow: 0 6px 24px rgba(138, 128, 216, .25);
+  animation: brandIn .7s ease both, glowPulse 3.6s ease-in-out infinite;
 }
+@keyframes brandIn { from { opacity: 0; transform: scale(.92); letter-spacing: 14px; } to { opacity: 1; transform: scale(1); letter-spacing: 8px; } }
 .brand-slogan {
   margin-top: 18px;
   font-size: 14px;
   color: var(--text-secondary, #858999);
   letter-spacing: 6px;
+  animation: fadeUp .6s .15s ease both;
 }
 
 /* ===== 轮播指示点 ===== */
 .splash-dots {
   position: absolute;
   left: 50%;
-  bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+  bottom: calc(74px + env(safe-area-inset-bottom, 0px));
   transform: translateX(-50%);
+  z-index: 3;
   display: flex;
   gap: 8px;
 }
@@ -183,5 +255,21 @@ onBeforeUnmount(() => {
   width: 22px;
   border-radius: 4px;
   background: var(--accent, #8A80D8);
+}
+
+/* ===== 底部加载进度条（装饰：覆盖首屏资源就绪时间） ===== */
+.splash-progress {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: calc(54px + env(safe-area-inset-bottom, 0px));
+  z-index: 3;
+  padding: 0 32vw;
+}
+.splash-progress .bar {
+  height: 3px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #8A80D8, #D6B45D);
+  box-shadow: 0 0 10px rgba(138,128,216,.4);
+  transition: width .12s linear;
 }
 </style>
