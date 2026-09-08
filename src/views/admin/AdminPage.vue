@@ -287,6 +287,14 @@ async function publish() {
   if (busy.value) return;
   busy.value = true;
   pubLog.value = '';
+  // 先自动保存当前模块（把编辑器改动落盘到 public/content/*.json），
+  // 否则后续发布只扫磁盘改动，未保存的内容不会被提交。
+  msg.value = '💾 先保存当前模块…';
+  await save();
+  if (!msg.value.startsWith('✅')) {
+    busy.value = false;
+    return; // 保存失败，中止发布（线上仍是旧版本）
+  }
   msg.value = '☁️ 发布中：内容校验 → 提交 → 推送…';
   try {
     const res: any = await api('publish', 'POST', {});
