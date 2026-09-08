@@ -51,6 +51,7 @@
         "glowColor": "#ffffff"
       },
       "bgVideo": "/content/videos/banner-video-s1.mp4?t=1788349070422",
+      "videoPoster": "/content/videos/banner-poster.png",
       "lineGap": 0,
       "buttonScale": 0.9,
       "buttonBg": "#beb7f0",

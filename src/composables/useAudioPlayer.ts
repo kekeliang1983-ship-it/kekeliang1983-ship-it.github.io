@@ -13,8 +13,19 @@ import type { IMusicTrack } from '@/types/index';
 const modules = useModulesStore();
 const user = useUserStore();
 
-const player = new Audio();
+// 注意：必须用挂入 DOM 的 <audio> 元素。用 new Audio() 创建的游离元素在 iOS/部分移动端
+// 浏览器会被静默拒绝播放（play() 既不报错也不出声）。挂到 body 后跨端一致可用。
+const player: HTMLAudioElement =
+  typeof document !== 'undefined' ? document.createElement('audio') : (new Audio() as HTMLAudioElement);
 player.preload = 'auto';
+player.volume = 1;
+if (typeof document !== 'undefined') {
+  if (document.body) document.body.appendChild(player);
+  else document.addEventListener('DOMContentLoaded', () => document.body?.appendChild(player));
+}
+// 是否「希望播放中」：play() 因数据未就绪被拒时，等 canplay/loadeddata 自动重试，
+// 避免「首帧/换源时 play() 在加载完成前被浏览器拒绝 → 永久停在首帧、静默不播」。
+let wantsPlay = false;
 
 const isPlaying = ref(false);
 const currentTrackId = ref(modules.musicTracks.find((t) => t.isUnlocked)?.id ?? '');
@@ -91,14 +102,27 @@ player.addEventListener('play', () => { isPlaying.value = true; updateMediaState
 player.addEventListener('pause', () => { isPlaying.value = false; flushAccum(); updateMediaState('paused'); });
 player.addEventListener('ended', () => {
   flushAccum();
-  if (canSwitch.value) skip(1); else isPlaying.value = false;
+  if (canSwitch.value) skip(1); else { wantsPlay = false; isPlaying.value = false; }
 });
 player.addEventListener('error', () => {
   // 解码/加载失败：确保不进入「假播放」状态（防作弊），提示交由 UI 层处理
+  wantsPlay = false;
   isPlaying.value = false;
   const msg = '该曲目暂时无法播放，请稍后再试';
   if (ui?.showToast) ui.showToast(msg); else pendingError.value = msg;
 });
+
+/* ---------- 数据就绪后补播（修复「play() 在加载完成前被浏览器拒绝」导致永久停在首帧） ---------- */
+function tryPlay() {
+  if (!wantsPlay) return;
+  const p = player.play();
+  if (p && p.catch) {
+    // 被拒多因数据未就绪：静默忽略，等下面 loadeddata/canplay 再补一次
+    p.catch(() => {});
+  }
+}
+player.addEventListener('loadeddata', () => { if (wantsPlay && player.paused) tryPlay(); });
+player.addEventListener('canplay', () => { if (wantsPlay && player.paused) tryPlay(); });
 
 /* ---------- Media Session（锁屏控制 + 后台保活） ---------- */
 function setupMediaSession(t: IMusicTrack) {
@@ -120,28 +144,26 @@ function updateMediaState(state: 'playing' | 'paused') {
 /* ---------- 播放控制（UI 层直接调用） ---------- */
 function playTrack(t: IMusicTrack) {
   // 点击当前正在播放的曲目 → 暂停
-  if (currentTrackId.value === t.id && !player.paused) { player.pause(); return; }
+  if (currentTrackId.value === t.id && !player.paused) { wantsPlay = false; player.pause(); return; }
   currentTrackId.value = t.id;
   position.value = 0;
   if (t.src) {
+    wantsPlay = true;
     player.src = t.src;
     player.currentTime = 0;
     setupMediaSession(t);
-    // 仅由真实 'play' 事件驱动 isPlaying；失败回退，杜绝无声刷挂机收益（防作弊）
-    void player.play().catch(() => {
-      isPlaying.value = false;
-      const msg = '该曲目暂时无法播放，请稍后再试';
-      if (ui?.showToast) ui.showToast(msg); else pendingError.value = msg;
-    });
+    // 仅由真实 'play' 事件驱动 isPlaying；被拒则由 canplay/loadeddata 重试（见上）
+    tryPlay();
   } else {
+    wantsPlay = false;
     isPlaying.value = false;
   }
 }
 function togglePlay() {
   const t = currentTrack.value;
   if (!t?.src) return;
-  if (player.paused) void player.play().catch(() => {});
-  else player.pause();
+  if (player.paused) { wantsPlay = true; tryPlay(); }
+  else { wantsPlay = false; player.pause(); }
 }
 function skip(dir: 1 | -1) {
   const list = unlockedTracks.value;
