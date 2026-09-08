@@ -37,6 +37,9 @@
         <div class="actions">
           <button class="btn" :disabled="busy || loading" @click="save">💾 保存</button>
           <button class="btn primary" :disabled="busy || loading" @click="buildAndSave">🚀 保存并构建</button>
+          <button class="btn publish" :disabled="busy || loading" @click="publish" title="校验 → git 提交 → 推送，CI 自动部署上线">
+            ☁️ 一键发布
+          </button>
           <span class="act-sep"></span>
           <button class="btn ghost" :disabled="busy || loading" @click="showDiff = !showDiff">🔍 对比</button>
           <button class="btn ghost" :disabled="busy || loading" @click="showSnaps = !showSnaps">
@@ -49,6 +52,7 @@
       </header>
 
       <p class="msg" v-if="msg">{{ msg }}</p>
+      <pre class="pub-log" v-if="pubLog">{{ pubLog }}</pre>
 
       <!-- 关键：必须等 model 就绪再渲染编辑器。
            早期版本 loading 初值为 false，首渲染把 null 传进编辑器 →
@@ -272,6 +276,26 @@ async function rollback(ts: number) {
     persistSnaps();
   } catch (e: any) {
     msg.value = '回滚失败：' + (e?.message || e);
+  } finally {
+    busy.value = false;
+  }
+}
+
+/** 一键发布：跑 scripts/publish-content.mjs（校验 → 提交 → 推送），CI 随后自动部署 */
+const pubLog = ref('');
+async function publish() {
+  if (busy.value) return;
+  busy.value = true;
+  pubLog.value = '';
+  msg.value = '☁️ 发布中：内容校验 → 提交 → 推送…';
+  try {
+    const res: any = await api('publish', 'POST', {});
+    pubLog.value = String(res?.log || '').trim();
+    msg.value = res?.ok
+      ? '🎉 已推送！GitHub Actions 正在自动部署（约 2–5 分钟）'
+      : '❌ 发布未成功，详见下方日志（线上仍是旧版本，未受影响）';
+  } catch (e: any) {
+    msg.value = '❌ 发布失败：' + (e?.message || e);
   } finally {
     busy.value = false;
   }
@@ -556,6 +580,12 @@ onMounted(() => load(activeId.value));
 .btn { border: 1px solid #d6dcec; background: #fff; border-radius: 10px; padding: 8px 14px; font-size: 13px; cursor: pointer; position: relative; }
 .btn.primary { background: #6e8efb; color: #fff; border-color: #6e8efb; }
 .btn.ghost { background: #f3f5fb; color: #4a4f63; }
+.btn.publish { background: #12b886; color: #fff; border-color: #12b886; }
+.pub-log {
+  margin: 0; padding: 10px 22px; max-height: 220px; overflow: auto;
+  background: #1e222b; color: #c9d1d9; font-size: 12px; line-height: 1.6;
+  white-space: pre-wrap; word-break: break-all;
+}
 .btn.sm { padding: 4px 10px; font-size: 12px; }
 .btn:disabled { opacity: .5; cursor: default; }
 .badge { position: absolute; top: -6px; right: -6px; min-width: 16px; height: 16px; padding: 0 4px; border-radius: 9px; background: #6e8efb; color: #fff; font-size: 10px; line-height: 16px; text-align: center; }

@@ -49,7 +49,9 @@ function adminApiPlugin(tokenFromEnv?: string) {
           // 通用内容读写：/__admin_api/<name>  ↔  public/content/<name>.json
           // 覆盖 gallery / banner / music / pet / shrine / artifacts / bottle 等所有模块
           const dyn = root.match(/^([a-z0-9_-]+)$/i);
-          if (dyn && root !== 'upload' && root !== 'build') {
+          // 注意：'publish' / 'build' / 'upload' 是专用处理器（见下文），
+          // 必须从通用动态内容处理器中排除，否则会被当成 content 文件读写而短路。
+          if (dyn && root !== 'upload' && root !== 'build' && root !== 'publish') {
             const file = dyn[1];
             const p = join(contentDir, file + '.json');
             if (req.method === 'GET') {
@@ -78,6 +80,25 @@ function adminApiPlugin(tokenFromEnv?: string) {
             await fs.mkdir(join(dest, '..'), { recursive: true });
             await fs.writeFile(dest, Buffer.from(body.data || '', 'base64'));
             return sendJson(res, 200, { ok: true, url: '/' + safe });
+          }
+          if (req.method === 'POST' && root === 'publish') {
+            // 内容一键发布：跑 scripts/publish-content.mjs（校验 → 提交 → 推送），
+            // 之后 GitHub Actions 自动构建部署。仅 dev 中间件可达，生产无此能力。
+            const body = (await readBody(req)) || '{}';
+            let dry = false;
+            try { dry = !!JSON.parse(body || '{}').dry; } catch { dry = false; }
+            const child = spawn(
+              process.execPath,
+              ['scripts/publish-content.mjs', ...(dry ? ['--dry-run'] : [])],
+              { cwd: __dirname },
+            );
+            let log = '';
+            child.stdout.on('data', (d: any) => (log += d.toString()));
+            child.stderr.on('data', (d: any) => (log += d.toString()));
+            child.on('close', (code: number) =>
+              sendJson(res, 200, { ok: code === 0, code, log: log.slice(-4000) }),
+            );
+            return;
           }
           if (req.method === 'POST' && root === 'build') {
             // 本地构建（rm -rf dist && npm run build）；CloudStudio 发布由外部工具完成

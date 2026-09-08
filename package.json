@@ -11,6 +11,9 @@
     "preview": "vite preview --mode production",
     "preview:offline": "vite preview --mode offline",
     "typecheck": "vue-tsc --noEmit",
+    "content:validate": "node scripts/validate-content.mjs",
+    "content:publish": "node scripts/publish-content.mjs",
+    "content:publish:dry": "node scripts/publish-content.mjs --dry-run",
     "postbuild": "node scripts/post-build.js"
   },
   "browserslist": [
