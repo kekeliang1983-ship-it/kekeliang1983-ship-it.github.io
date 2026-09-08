@@ -93,7 +93,7 @@ returns table (fingerprint text, time_ms integer, pet_element text) language sql
   )
   select r.fingerprint, r.time_ms, r.pet_element from ranked r where r.rn = 1
   order by r.time_ms asc limit p_limit; $$;
-grant execute on function public.best_race_opponents(text, text, integer) to anon;
+grant execute on function public.best_race_opponents(text, text, integer, text) to anon;
 
 -- ============================================================
 -- 数据合法性 CHECK 约束（not valid：不校验历史，对新写入立即生效）
